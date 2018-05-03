@@ -2,20 +2,10 @@
 
 This is a script for converting [UCI Machine Learning Repository](http://archive.ics.uci.edu/ml/datasets.html) datasets (and some from other sources) into a common format. The UCI ML repository is a useful source for machine learning datasets for testing and benchmarking, but the format of datasets is not consistent. This means effort is required in order to make use of new datasets since they need to be read differently.
 
-Instead, the aim is to convert the datasets into a common format (CSV), where each line is as follows:
+Instead, the aim is to convert the datasets into a format to be read
+from [PyRidge](https://github.com/cperales/PyRidge), where each line is as follows:
 
-    ID,attribute_1,attribute_2,...,attribute_n,class
-
-The attribute header names start with `C` or `N`, indicating categoric or numeric variables. 
-
-These datasets can then be read using `DataFrames` in Julia using the following, with categoric columns pooled into `PooledDataArray` type:
-
-    df = readtable(dataset, header=true)
-    for name in names(df)
-      if string(name)[1] == 'C'
-        pool!(df, name)
-      end
-    end
+    attribute_1 attribute_2 ... attribute_n class
 
 This makes it easy to switch out datasets in ML problems, which is great when automating things!
 
@@ -29,17 +19,9 @@ The datasets are not checked in to git in order to minimise the size of the repo
 
 Use the following command from the root folder:
 
-    julia runconvert.jl
+    python join_url_classification
 
-This processes all data folders in the `datafiles` folder. The output directory is the `processed` folder.
-
-    usage: runconvert.jl [-mc]
-
-    optional arguments:
-      -m, --missing           whether to keep NAs or remove the rows
-      -c, --categoric         keep categoric features as strings
-
-For example, if you wanted to keep the missing data as NAs but onehot encode categoric features, you can run `julia convert.jl -m`
+And this sent the urls from data to `database/wget_database.txt`
 
 ## Guide to config files
 
