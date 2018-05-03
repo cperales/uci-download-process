@@ -1,4 +1,4 @@
-# UCI ML Repository conversion script
+# UCI Machine Learning Repository downloading and conversion scripts
 
 This is a script for converting [UCI Machine Learning Repository](http://archive.ics.uci.edu/ml/datasets.html) datasets (and some from other sources) into a common format. The UCI ML repository is a useful source for machine learning datasets for testing and benchmarking, but the format of datasets is not consistent. This means effort is required in order to make use of new datasets since they need to be read differently.
 
@@ -93,6 +93,7 @@ The separator between values in the dataset. If this is left blank, the input da
 
 An integer number of header lines in the dataset before the values are reached.
 
-## Contributing
+## Acknowledgement
 
-Please feel free to add new datasets via pull request!
+Config files comes from [JackDunnNZ/uci-data](https://github.com/JackDunnNZ/uci-data)
+repository. Contributing by adding new datasets to original repository is recommended.
