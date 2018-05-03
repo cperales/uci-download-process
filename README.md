@@ -87,7 +87,7 @@ A subset of the integers specified in `value_indices` that indicate those data v
 
 ##### separator
 
-The separator between values in the dataset. If this is left blank, the input dataset is broken on all whitespace. Due to limitations in `ConfParser.jl`, for a comma you need to use `comma` rather than just `,`.
+The separator between values in the dataset.
 
 ##### header_lines
 
