@@ -15,7 +15,7 @@ for folder in os.listdir(folder_classification):
             if '.ini' in file:  # It's the config file we're looking for
                 list_files.append('/'.join([complete_folder, file]))
 
-with open('wget_database.txt', 'w') as f:
+with open('classification_db.txt', 'w') as f:
     for file in list_files:
         config = configparser.ConfigParser()
         config.read(file)
@@ -26,4 +26,4 @@ with open('wget_database.txt', 'w') as f:
         except Exception as e:
             print(e)
 
-subprocess.run('wget -i wget_database.txt -P database/'.split())
+subprocess.run('wget -i classification_db.txt -P database/'.split())
