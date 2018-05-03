@@ -14,7 +14,7 @@ for folder in os.listdir(folder_classification):
             if '.ini' in file:  # It's the config file we're looking for
                 list_files.append('/'.join([complete_folder, file]))
 
-with open('wget_database.txt', 'w') as f:
+with open('database/wget_database.txt', 'w') as f:
     for file in list_files:
         config = configparser.ConfigParser()
         config.read(file)
