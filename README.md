@@ -17,11 +17,24 @@ The datasets are not checked in to git in order to minimise the size of the repo
 
 #### Command line
 
-Use the following command from the root folder:
+For downloading, use the following command from the root folder:
 
-    python join_url_classification
+```bash
+python download_classification.py
+```
 
-And this sent the urls from data to `database/wget_database.txt`
+And this sent the urls from data to `classification_db.txt`. If data
+was downloaded before, it won't be added again.
+
+For converting the downloaded files into the format described in
+the previous section (attributes separated by spaces, integer target
+at last position), run:
+
+```bash
+python convert_data.py
+```
+
+Files that cannot be converted
 
 ## Guide to config files
 
