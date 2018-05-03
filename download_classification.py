@@ -1,11 +1,11 @@
 import configparser
 import os
-import wget
+# import wget
+import subprocess
 
 config_folder = 'datafiles/classification/'
 dataset_folders = list()
 list_files = list()
-downloaded_data = list()
 
 with open('classification_db.txt', 'w') as f:
     for folder in os.listdir(config_folder):
@@ -23,10 +23,8 @@ with open('classification_db.txt', 'w') as f:
                         data_url = config['info']['data_url']
                         if '.data' in data_url:
                             f.write(''.join([data_url, '\n']))
-                            filename = wget.download(data_url, out=complete_folder)
-                            downloaded_data.append((filename, config))
+                            # filename = wget.download(data_url, out=complete_folder)
+                            bash_command = ['wget', '-N', data_url, '-P', complete_folder]
+                            subprocess.run(bash_command)
                     except Exception as e:
                         print(e)
-
-# import subprocess
-# subprocess.run('wget -i classification_db.txt -P database/'.split())
