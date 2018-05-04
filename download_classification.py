@@ -25,7 +25,8 @@ with open('classification_db.txt', 'w') as f:
                         if '.data' in data_url:
                             f.write(''.join([data_url, '\n']))
                             # filename = wget.download(data_url, out=complete_folder)
-                            bash_command = ['wget', '-N', data_url, '-P', complete_folder]
+                            final_filename = '/'.join([complete_folder, data_name])
+                            bash_command = ['wget', '-nc', data_url, '-O', final_filename]
                             subprocess.run(bash_command)
                     except Exception as e:
                         print(e)
