@@ -7,3 +7,6 @@
 # Python
 __pycache__/
 env/
+
+# Files
+*.txt

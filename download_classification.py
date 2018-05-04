@@ -21,6 +21,7 @@ with open('classification_db.txt', 'w') as f:
                     config.read(config_file)
                     try:
                         data_url = config['info']['data_url']
+                        data_name = config['info']['name']
                         if '.data' in data_url:
                             f.write(''.join([data_url, '\n']))
                             # filename = wget.download(data_url, out=complete_folder)
