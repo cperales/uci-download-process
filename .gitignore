@@ -1,5 +1,6 @@
 # Processed data
 *.data*
+uci/
 
 # Pycharm
 .idea/
