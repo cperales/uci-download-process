@@ -122,7 +122,13 @@ for directory in folders:
                 error_files.append(data_file)
 
         else:
-            print('{} does not have .data and .ini files'.format(full_dir))
+            if config_file is None:
+                if data_file is None:
+                    print('{} does not have .data and .ini files'.format(full_dir))
+                else:
+                    print('{} does not have .ini file'.format(full_dir))
+            else:
+                print('{} does not have .data file'.format(full_dir))
             download_error.append(full_dir)
     else:
         print('{} directory does not exist'.format(full_dir))
