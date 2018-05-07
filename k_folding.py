@@ -1,4 +1,5 @@
 import os
+import shutil
 import pandas as pd
 from sklearn.model_selection import StratifiedKFold
 
@@ -6,23 +7,23 @@ from sklearn.model_selection import StratifiedKFold
 # # MERGING TRAINING AND SETS DATASETS .1 IN ONE FILE
 data_folder = 'uci'
 
-dir_files = []
+dir_file_pairs = []
 
 for dir_name in os.listdir(data_folder):
     full_dir_name = os.path.join(data_folder, dir_name)
     for file_name in os.listdir(full_dir_name):
         if '.data' == file_name[-5:]:  # Storing data name
-            dir_files.append((full_dir_name, file_name))
+            dir_file_pairs.append((full_dir_name, file_name))
         else:
             file_to_delete = os.path.join(full_dir_name, file_name)
             os.remove(file_to_delete)
 
 # SPLITTING ONE DATASET FILE IN N_FOLDS
 n_fold = 10
-for pair_dir_file in dir_files:
+for dir_file_pair in dir_file_pairs:
     try:
         list_df_file = []
-        dir_name, file_name = pair_dir_file
+        dir_name, file_name = dir_file_pair
         df_file = pd.read_csv(os.path.join(dir_name, file_name),
                               sep='\s+',
                               header=None)
@@ -56,4 +57,5 @@ for pair_dir_file in dir_files:
 
             i += 1
     except ValueError:
-        print('{} can\'t be stratified'.format(pair_dir_file[1]))
+        print('{} can\'t be stratified'.format(dir_file_pair[1]))
+        shutil.rmtree(dir_name)
