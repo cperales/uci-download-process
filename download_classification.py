@@ -4,29 +4,44 @@ import os
 import subprocess
 
 config_folder = 'datafiles/classification/'
-dataset_folders = list()
-list_files = list()
 
-with open('classification_db.txt', 'w') as f:
-    for folder in os.listdir(config_folder):
-        complete_folder = ''.join([config_folder, folder])
-        if os.path.isdir(complete_folder):  # It could be a .csv
-            dataset_folders.append(folder)
-            files = os.listdir(complete_folder)
-            for file in files:
-                if '.ini' in file:  # It's the config file we're looking for
-                    config_file = '/'.join([complete_folder, file])
-                    list_files.append(config_file)
-                    config = configparser.ConfigParser()
-                    config.read(config_file)
-                    try:
-                        data_url = config['info']['data_url']
-                        data_name = config['info']['name']
-                        if '.data' in data_url:
+
+def download_files():
+    dataset_folders = list()
+    list_files = list()
+
+    with open('classification_db.txt', 'w') as f:
+        for folder in os.listdir(config_folder):
+            complete_folder = ''.join([config_folder, folder])
+            if os.path.isdir(complete_folder):  # It could be a .csv
+                dataset_folders.append(folder)
+                files = os.listdir(complete_folder)
+                for file in files:
+                    if '.ini' in file:  # It's the config file we're looking for
+                        config_file = '/'.join([complete_folder, file])
+                        list_files.append(config_file)
+                        config = configparser.ConfigParser()
+                        config.read(config_file)
+                        try:
+                            data_url = config['info']['data_url']
+                            data_name = config['info']['name']
                             f.write(''.join([data_url, '\n']))
-                            # filename = wget.download(data_url, out=complete_folder)
                             final_filename = '/'.join([complete_folder, data_name])
                             bash_command = ['wget', '-nc', data_url, '-O', final_filename]
                             subprocess.run(bash_command)
-                    except Exception as e:
-                        print(e)
+                        except Exception as e:
+                            print(e)
+
+
+def remove_files():
+    for folder in os.listdir(config_folder):
+        complete_folder = ''.join([config_folder, folder])
+        if os.path.isdir(complete_folder):  # It could be a .csv
+            files = os.listdir(complete_folder)
+            for file in files:
+                if '.ini' not in file:
+                    os.remove('/'.join([complete_folder, file]))
+
+
+if __name__ == '__main__':
+    download_files()
