@@ -101,12 +101,6 @@ for directory in folders:
                 # Saving the dataframe into processed folder
                 df.to_csv(''.join([processed_folder, data_file]), sep=' ', header=False, index=False)
 
-                # Saving the dataframe into nested folder
-                final_folder = ''.join([nested_folder, data_file.replace('.data', '')])
-                if not os.path.isdir(final_folder):
-                    os.mkdir(final_folder)
-                df.to_csv('/'.join([final_folder, data_file]), sep=' ', header=False, index=False)
-
             except pd.errors.ParserError as e:
                 print(' '.join([data_file, 'gives a parser error']))
                 error_files.append(data_file)
