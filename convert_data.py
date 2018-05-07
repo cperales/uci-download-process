@@ -6,11 +6,15 @@ from sklearn.preprocessing import LabelEncoder
 
 config_folder = 'datafiles/classification/'
 processed_folder = 'processed/'
+nested_folder = 'uci/'
 error_files = list()
 download_error = list()
 
 if not os.path.isdir(processed_folder):
     os.mkdir(processed_folder)
+
+if not os.path.isdir(nested_folder):
+    os.mkdir(nested_folder)
 
 # Folders from configuration
 folders = os.listdir(config_folder)
@@ -40,11 +44,29 @@ for directory in folders:
                 config = configparser.ConfigParser()
                 config.read('/'.join([full_dir, config_file]))
                 sep = separators[config['info']['separator']]
+                # Does it have index?
+                index = config['info']['id_indices']
+                if index == '':
+                    index_col = None
+                else:
+                    index_col = int(index) - 1
                 # Read data
-                df = pd.read_csv('/'.join([full_dir, data_file]), sep=sep, header=None)
+                df = pd.read_csv('/'.join([full_dir, data_file]),
+                                 sep=sep,
+                                 index_col=index_col,
+                                 header=None)
                 # Remove NaN
                 df = df.replace('?', np.nan)
-                df = df.dropna()
+                # Remove missing
+                df = df.replace('', np.nan)
+                # REMOVING
+                # Removing depending on how many data are left out
+                len_rm_rows = len(df.dropna(axis=0).index)  # Length when rows are removed
+                len_rm_cols = len(df.dropna(axis=1).index)  # Length when columns are removed
+                if len_rm_cols > len_rm_rows:
+                    df = df.dropna(axis=1)
+                else:
+                    df = df.dropna(axis=0)
                 # Changing label to last column
                 final_column = df.columns[-1]
                 label_column = int(config['info']['target_index']) - 1  # In python, index begins at 0
@@ -69,8 +91,15 @@ for directory in folders:
                         except Exception as e:
                             print(e)
 
-                # Saving the dataframe
+                # Saving the dataframe into processed folder
                 df.to_csv(''.join([processed_folder, data_file]), sep=' ', header=False, index=False)
+
+                # Saving the dataframe into nested folder
+                final_folder = ''.join([nested_folder, data_file.replace('.data', '')])
+                if not os.path.isdir(final_folder):
+                    os.mkdir(final_folder)
+                df.to_csv('/'.join([final_folder, data_file]), sep=' ', header=False, index=False)
+
             except pd.errors.ParserError as e:
                 print(' '.join([data_file, 'gives a parser error']))
                 error_files.append(data_file)
@@ -85,6 +114,10 @@ for directory in folders:
 
             except TypeError as e:
                 print(' '.join([data_file, 'gives a TypeError']))
+                error_files.append(data_file)
+
+            except IndexError as e:
+                print(' '.join([data_file, 'separator is not correct']))
                 error_files.append(data_file)
 
         else:
