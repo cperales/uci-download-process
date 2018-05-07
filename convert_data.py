@@ -45,6 +45,16 @@ for directory in folders:
                 config = configparser.ConfigParser()
                 config.read('/'.join([full_dir, config_file]))
                 sep = separators[config['info']['separator']]
+                # Does it have header?
+                header = config['info']['header_lines']
+                if header == '':
+                    header = None
+                    skiprows = None
+                else:
+                    skiprows = int(header)
+                    header = int(header) - 1
+                    if header < 0:
+                        header = None
                 # Does it have index?
                 index = config['info']['id_indices']
                 if index == '':  # There is no index
@@ -58,10 +68,21 @@ for directory in folders:
                         for i in index:
                             index_col.append(i)
                 # Read data
-                df = pd.read_csv('/'.join([full_dir, data_file]),
-                                 sep=sep,
-                                 index_col=index_col,
-                                 header=None)
+                try:
+                    df = pd.read_csv('/'.join([full_dir, data_file]),
+                                     sep=sep,
+                                     index_col=index_col,
+                                     # header=header,
+                                     header=None,
+                                     skiprows=skiprows)
+                except IndexError:  # In some datasets, last column ins class.|index
+                    df = pd.read_csv('/'.join([full_dir, data_file]),
+                                     sep=sep,
+                                     # header=header,
+                                     header=None,
+                                     skiprows=skiprows)
+                    df[df.columns[-1]] = pd.Series([e.split('.|')[0] for e in df[df.columns[-1]]])
+                    # df[df.columns[-1]] = df[df.columns[-1]].split('.|')[0]
                 # Remove NaN
                 df = df.replace('?', np.nan)
                 # Remove missing
@@ -84,17 +105,21 @@ for directory in folders:
                     df[final_column] = df[label_column]
                     df[label_column] = a
 
+                # Now, final column is the column for the label
                 if df[final_column].dtype != int and df[final_column].dtype != float:
                     le = LabelEncoder()
                     df[final_column] = le.fit_transform(df[final_column])
 
+                if df[final_column].dtype == float:
+                    df[final_column] = pd.Series(df[final_column], dtype=np.int)
+
                 for c in df.columns[:final_column]:
                     if df[c].dtype == float or df[c].dtype == int:  # It is a float, but it was parsed as int
-                        df[c] = pd.Series(df[c], dtype=float)
+                        df[c] = pd.Series(df[c], dtype=np.float)
                     else:  # It was a string, need to be transformed
                         le = LabelEncoder()
                         try:
-                            df[c] = pd.Series(le.fit_transform(df[c]), dtype=float)
+                            df[c] = pd.Series(le.fit_transform(df[c]), dtype=np.float)
                         except Exception as e:
                             print(e)
 
@@ -144,6 +169,7 @@ with open('error_files.txt', 'w') as f:
 with open('download_error.txt', 'w') as f:
     if len(download_error) > 0:
         for folder in download_error:
-            f.write(''.join([folder, '\n']))
+            if os.path.isdir(folder):
+                f.write(''.join([folder, '\n']))
     else:
         f.write('\n')
