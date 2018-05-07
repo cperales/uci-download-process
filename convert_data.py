@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 import configparser
 import pandas as pd
@@ -25,7 +26,8 @@ folders = os.listdir(config_folder)
 # download_error = [line.rstrip('\n') for line in open('download_error.txt')]
 
 separators = {'comma': ',',
-              '': r'\s+'}
+              '': r'\s+',
+              ';': ';'}
 
 for directory in folders:
     config_file = None
@@ -43,7 +45,9 @@ for directory in folders:
             try:
                 # Read config file
                 config = configparser.ConfigParser()
-                config.read('/'.join([full_dir, config_file]))
+                with open('/'.join([full_dir, config_file]), 'r', encoding='utf-8') as f:
+                    config.read_file(f)
+                # config.read('/'.join([full_dir, config_file]))
                 sep = separators[config['info']['separator']]
                 # Does it have header?
                 header = config['info']['header_lines']
@@ -66,7 +70,7 @@ for directory in folders:
                     else:  # Several indexes
                         index_col = list()
                         for i in index:
-                            index_col.append(i)
+                            index_col.append(i - 1)
                 # Read data
                 try:
                     df = pd.read_csv('/'.join([full_dir, data_file]),
@@ -82,16 +86,36 @@ for directory in folders:
                                      header=None,
                                      skiprows=skiprows)
                     df[df.columns[-1]] = pd.Series([e.split('.|')[0] for e in df[df.columns[-1]]])
-                    # df[df.columns[-1]] = df[df.columns[-1]].split('.|')[0]
+                except pd.errors.ParserError as e:
+                    # Maybe there is a easier way
+                    sk = int(re.findall(r'\d+', re.findall(r'line \d+', str(e))[0])[0]) - 1
+                    df = pd.read_csv('/'.join([full_dir, data_file]),
+                                     sep=sep,
+                                     index_col=index_col,
+                                     # header=header,
+                                     header=None,
+                                     skiprows=[skiprows, sk])
+                except UnicodeDecodeError as e:
+                    df = pd.read_csv('/'.join([full_dir, data_file]),
+                                     sep=sep,
+                                     index_col=index_col,
+                                     # header=header,
+                                     header=None,
+                                     skiprows=skiprows,
+                                     encoding='utf-16le')
                 # Remove NaN
                 df = df.replace('?', np.nan)
                 # Remove missing
                 df = df.replace('', np.nan)
                 # REMOVING
                 # Removing depending on how many data are left out
-                len_rm_rows = len(df.dropna(axis=0).index)  # Length when rows are removed
-                len_rm_cols = len(df.dropna(axis=1).index)  # Length when columns are removed
-                if len_rm_cols > len_rm_rows:
+                n_len = len(df.index)  # Length of instances
+                m_len = len(df.columns)  # Length of features
+                n_len_rm_rows = len(df.dropna(axis=0).index)  # Length of instances when rows are removed
+                m_len_rm_rows = len(df.dropna(axis=0).columns)  # Length of features when columns are removed
+                n_len_rm_cols = len(df.dropna(axis=1).index)  # Length of instances when columns are removed
+                m_len_rm_cols = len(df.dropna(axis=1).columns)  # Length of features when columns are removed
+                if (n_len_rm_cols > n_len_rm_rows and m_len_rm_cols > m_len / 4) or n_len_rm_rows == 0:
                     df = df.dropna(axis=1)
                 else:
                     df = df.dropna(axis=0)
@@ -114,9 +138,10 @@ for directory in folders:
                     df[final_column] = pd.Series(df[final_column], dtype=np.int)
 
                 for c in df.columns[:final_column]:
-                    if df[c].dtype == float or df[c].dtype == int:  # It is a float, but it was parsed as int
+                    try:
+                        example = float(df[c].values[0])
                         df[c] = pd.Series(df[c], dtype=np.float)
-                    else:  # It was a string, need to be transformed
+                    except ValueError:  # It was a string, need to be transformed
                         le = LabelEncoder()
                         try:
                             df[c] = pd.Series(le.fit_transform(df[c]), dtype=np.float)
@@ -128,10 +153,6 @@ for directory in folders:
 
             except pd.errors.ParserError as e:
                 print(' '.join([data_file, 'gives a parser error']))
-                error_files.append(data_file)
-
-            except UnicodeDecodeError as e:
-                print(' '.join([data_file, 'gives an Unicode error']))
                 error_files.append(data_file)
 
             except KeyError as e:
@@ -156,8 +177,9 @@ for directory in folders:
                 print('{} does not have .data file'.format(full_dir))
             download_error.append(full_dir)
     else:
-        print('{} directory does not exist'.format(full_dir))
-        download_error.append(full_dir)
+        # print('{} directory does not exist'.format(full_dir))
+        # download_error.append(full_dir)
+        pass
 
 with open('error_files.txt', 'w') as f:
     if len(error_files) > 0:
