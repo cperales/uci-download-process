@@ -47,10 +47,16 @@ for directory in folders:
                 sep = separators[config['info']['separator']]
                 # Does it have index?
                 index = config['info']['id_indices']
-                if index == '':
+                if index == '':  # There is no index
                     index_col = None
-                else:
-                    index_col = int(index) - 1
+                else:  # It could be one or several indexes
+                    index = eval(index)
+                    if isinstance(index, int):  # Just one index
+                        index_col = index - 1
+                    else:  # Several indexes
+                        index_col = list()
+                        for i in index:
+                            index_col.append(i)
                 # Read data
                 df = pd.read_csv('/'.join([full_dir, data_file]),
                                  sep=sep,
