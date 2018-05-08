@@ -43,8 +43,6 @@ for directory in folders:
             else:
                 pass
         if config_file is not None and data_file is not None:
-            if 'congressional-voting' in data_file:
-                print(data_file)
             try:
                 # Read config file
                 config = configparser.ConfigParser()
@@ -145,13 +143,9 @@ for directory in folders:
                 for c in df.columns[:final_column]:
                     try:
                         example = float(df[c].values[0])
-                        df[c] = pd.Series(df[c], dtype=np.float)
                     except ValueError:  # It was a string, need to be transformed
-                        le = LabelEncoder()
-                        try:
-                            df[c] = pd.Series(le.fit_transform(df[c]), dtype=np.float)
-                        except Exception as e:
-                            print(e)
+                        df[c] = LabelEncoder().fit_transform(df[c])
+                    df[c] = pd.Series(df[c], dtype=np.float)
 
                 # Saving the dataframe into processed folder
                 df.to_csv(''.join([processed_folder, data_file]), sep=' ', header=False, index=False)
