@@ -43,6 +43,8 @@ for directory in folders:
             else:
                 pass
         if config_file is not None and data_file is not None:
+            if 'congressional-voting' in data_file:
+                print(data_file)
             try:
                 # Read config file
                 config = configparser.ConfigParser()
@@ -110,8 +112,8 @@ for directory in folders:
                 if label_column != final_column:
                     if label_column not in df.columns:
                         raise KeyError('Label index {} is not in columns {}'.format(label_column, df.columns))
-                    a = df[final_column]
-                    df[final_column] = df[label_column]
+                    a = df[final_column].copy()
+                    df[final_column] = df[label_column].copy()
                     df[label_column] = a
 
                 # Now, final column is the column for the label
