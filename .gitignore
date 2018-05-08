@@ -1,6 +1,9 @@
-# Processed data
+# Data
 *.data*
 uci/
+
+# Logs
+logs/
 
 # Pycharm
 .idea/
@@ -8,6 +11,3 @@ uci/
 # Python
 __pycache__/
 env/
-
-# Files
-*.txt
