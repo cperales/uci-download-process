@@ -122,6 +122,10 @@ for directory in folders:
                     except TypeError as e:
                         df[final_column] = df[final_column].factorize()[0]
 
+                df[final_column] = pd.Series(df[final_column] +
+                                             (1 - np.min(df[final_column].values)),
+                                             dtype=np.int)
+
                 # Replacing missing by NaN
                 for m in missing:
                     df = df.replace(m, np.nan)
