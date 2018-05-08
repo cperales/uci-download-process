@@ -4,13 +4,14 @@ import os
 import subprocess
 
 config_folder = 'datafiles/classification/'
+log = 'logs/classification_db.txt'
 
 
 def download_files():
     dataset_folders = list()
     list_files = list()
 
-    with open('classification_db.txt', 'w') as f:
+    with open(log, 'w') as f:
         for folder in os.listdir(config_folder):
             complete_folder = ''.join([config_folder, folder])
             if os.path.isdir(complete_folder):  # It could be a .csv

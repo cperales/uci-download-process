@@ -9,6 +9,8 @@ from sklearn.preprocessing import LabelEncoder
 config_folder = 'datafiles/classification/'
 processed_folder = 'processed/'
 nested_folder = 'uci/'
+log_conversion = 'logs/convert_error.txt'
+log_download =  'logs/download_error.txt'
 error_files = list()
 download_error = list()
 
@@ -181,14 +183,14 @@ for directory in folders:
         # download_error.append(full_dir)
         pass
 
-with open('error_files.txt', 'w') as f:
+with open(log_conversion, 'w') as f:
     if len(error_files) > 0:
         for file in error_files:
            f.write(''.join([file, '\n']))
     else:
         f.write('\n')
 
-with open('download_error.txt', 'w') as f:
+with open(log_download, 'w') as f:
     if len(download_error) > 0:
         for folder in download_error:
             if os.path.isdir(folder):
