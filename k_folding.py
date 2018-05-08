@@ -1,7 +1,9 @@
 import os
 import shutil
 import pandas as pd
+import numpy as np
 import warnings
+import math
 from sklearn.model_selection import StratifiedKFold
 
 
@@ -66,12 +68,18 @@ def k_folding(file=None):
                 target_position = df_file.columns[-1]
                 x = df_file[[i for i in range(target_position)]]
                 y = df_file[[target_position]]
+                # Testing if there is enough instances for n fold
+                count = [np.count_nonzero(y == label) for label in np.unique(y)]
+                rep = np.max(count)  # If maximum is not enough to n fold
+                if n_fold > rep:
+                    times = math.ceil(n_fold / rep)
+                    x = pd.concat(times * [x])
+                    y = pd.concat(times * [y])
                 # Shuffle false in order to preserve
                 i = 0
                 file = file_name.replace('.data', '')
                 skf = StratifiedKFold(n_splits=n_fold, shuffle=False)
-                split_gen = skf.split(X=x, y=y)
-                for train_index, test_index in split_gen:
+                for train_index, test_index in skf.split(X=x, y=y):
                     x_train_fold = x.iloc[train_index]
                     y_train_fold = y.iloc[train_index]
                     train_fold = pd.concat([x_train_fold, y_train_fold], axis=1)

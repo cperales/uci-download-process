@@ -8,17 +8,14 @@ from sklearn.preprocessing import LabelEncoder
 
 config_folder = 'datafiles/classification/'
 processed_folder = 'processed/'
-nested_folder = 'uci/'
 log_conversion = 'logs/convert_error.txt'
 log_download =  'logs/download_error.txt'
 error_files = list()
 download_error = list()
 
-if not os.path.isdir(processed_folder):
-    os.mkdir(processed_folder)
-
-if not os.path.isdir(nested_folder):
-    os.mkdir(nested_folder)
+if os.path.isdir(processed_folder):
+    shutil.rmtree(processed_folder)
+os.mkdir(processed_folder)
 
 # Folders from configuration
 folders = os.listdir(config_folder)
@@ -30,6 +27,8 @@ folders = os.listdir(config_folder)
 separators = {'comma': ',',
               '': r'\s+',
               ';': ';'}
+
+missing = ['?', '-', '*', '']
 
 for directory in folders:
     config_file = None
@@ -105,22 +104,6 @@ for directory in folders:
                                      header=None,
                                      skiprows=skiprows,
                                      encoding='utf-16le')
-                # Remove NaN
-                df = df.replace('?', np.nan)
-                # Remove missing
-                df = df.replace('', np.nan)
-                # REMOVING
-                # Removing depending on how many data are left out
-                n_len = len(df.index)  # Length of instances
-                m_len = len(df.columns)  # Length of features
-                n_len_rm_rows = len(df.dropna(axis=0).index)  # Length of instances when rows are removed
-                m_len_rm_rows = len(df.dropna(axis=0).columns)  # Length of features when columns are removed
-                n_len_rm_cols = len(df.dropna(axis=1).index)  # Length of instances when columns are removed
-                m_len_rm_cols = len(df.dropna(axis=1).columns)  # Length of features when columns are removed
-                if (n_len_rm_cols > n_len_rm_rows and m_len_rm_cols > m_len / 4) or n_len_rm_rows == 0:
-                    df = df.dropna(axis=1)
-                else:
-                    df = df.dropna(axis=0)
                 # Changing label to last column
                 final_column = df.columns[-1]
                 label_column = int(config['info']['target_index']) - 1  # In python, index begins at 0
@@ -134,7 +117,25 @@ for directory in folders:
                 # Now, final column is the column for the label
                 if df[final_column].dtype != int and df[final_column].dtype != float:
                     le = LabelEncoder()
-                    df[final_column] = le.fit_transform(df[final_column])
+                    try:
+                        df[final_column] = le.fit_transform(df[final_column])
+                    except TypeError as e:
+                        df[final_column] = df[final_column].factorize()[0]
+
+                # Replacing missing by NaN
+                for m in missing:
+                    df = df.replace(m, np.nan)
+                # Removing depending on how many data are left out
+                n_len = len(df.index)  # Length of instances
+                m_len = len(df.columns)  # Length of features
+                n_len_rm_rows = len(df.dropna(axis=0).index)  # Length of instances when rows are removed
+                m_len_rm_rows = len(df.dropna(axis=0).columns)  # Length of features when columns are removed
+                n_len_rm_cols = len(df.dropna(axis=1).index)  # Length of instances when columns are removed
+                m_len_rm_cols = len(df.dropna(axis=1).columns)  # Length of features when columns are removed
+                if (n_len_rm_cols > n_len_rm_rows and m_len_rm_cols > m_len / 3) or n_len_rm_rows == 0:
+                    df = df.dropna(axis=1)
+                else:
+                    df = df.dropna(axis=0)
 
                 if df[final_column].dtype == float:
                     df[final_column] = pd.Series(df[final_column], dtype=np.int)
