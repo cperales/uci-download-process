@@ -20,7 +20,7 @@ The datasets are not checked in to git in order to minimise the size of the repo
 For downloading, use the following command from the root folder:
 
 ```bash
-python download_classification.py
+python download_data.py
 ```
 
 And this sent the urls from data to `classification_db.txt`. If data
@@ -34,7 +34,12 @@ at last position), run:
 python convert_data.py
 ```
 
-Files that cannot be converted
+Eventually, processing data is finished with k folding, with `k=10`.
+
+```bash
+python k_folding.py
+```
+
 
 ## Guide to config files
 
