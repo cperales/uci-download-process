@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import warnings
 import math
+import os
 from sklearn.model_selection import StratifiedKFold
 
 
@@ -15,9 +16,12 @@ def warn(*args, **kwargs):
 warnings.warn = warn
 
 # # MERGING TRAINING AND SETS DATASETS .1 IN ONE FILE
-data_folder = 'uci'
+data_folder = 'data'
 processed_folder = 'processed/'
 log = 'logs/kfold_error.txt'
+
+if not os.path.isdir(data_folder):
+    os.mkdir(data_folder)
 
 
 def creating_nested_folders():

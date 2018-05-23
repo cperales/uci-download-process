@@ -1,6 +1,7 @@
 # Data
 *.data*
 uci/
+data/
 
 # Logs
 logs/
