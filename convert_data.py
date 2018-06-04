@@ -145,11 +145,14 @@ for directory in folders:
                     df[final_column] = pd.Series(df[final_column], dtype=np.int)
 
                 for c in df.columns[:final_column]:
+                    series_values = df[c].values
                     try:
-                        example = float(df[c].values[0])
+                        series = [float(series_values[i])
+                                  for i in range(len(df[c]))]
+                        df[c] = pd.Series(df[c], dtype=np.float)
                     except ValueError:  # It was a string, need to be transformed
-                        df[c] = LabelEncoder().fit_transform(df[c])
-                    df[c] = pd.Series(df[c], dtype=np.float)
+                        df[c] = pd.Series(LabelEncoder().fit_transform(series_values),
+                                          dtype=np.float)
 
                 # Saving the dataframe into processed folder
                 df.to_csv(''.join([processed_folder, data_file]), sep=' ', header=False, index=False)

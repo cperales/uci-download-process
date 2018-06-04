@@ -116,6 +116,5 @@ if __name__ == '__main__':
     print('Creating nested folders...')
     creating_nested_folders()
     print('K folding the datasets...')
-    print()
     k_folding()
     # k_folding(file=log)
