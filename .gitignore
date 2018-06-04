@@ -11,4 +11,4 @@ logs/
 
 # Python
 __pycache__/
-env/
+env*/
