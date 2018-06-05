@@ -3,6 +3,7 @@
 uci/
 data/
 *.csv
+*.pdf
 
 # Logs
 logs/

@@ -22,7 +22,7 @@ for d in full_data_files:
     last_pos = attribute
     classes = np.unique(df[last_pos])
     n_classes = len(classes)
-    distribution = [len(df[df[last_pos] == c]) for c in classes]
+    distribution = tuple([len(df[df[last_pos] == c]) for c in classes])
     data_list.append({'Dataset': name,
                       'Size': lines,
                       'Attributes': attribute,
