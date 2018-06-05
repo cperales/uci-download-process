@@ -1,4 +1,3 @@
-import subprocess
 import glob
 import pandas as pd
 import numpy as np
@@ -9,6 +8,7 @@ data_files = [d.split('/')[2].split('.')[0] for d in full_data_files]
 data_list = list()
 for d in full_data_files:
     name = d.split('/')[2].split('.')[0]
+    # # BASH
     # command = ['wc', d, '-l']
     # f = subprocess.Popen(command, stdout=subprocess.PIPE).stdout
     # output = str(f.read().splitlines()[0])
