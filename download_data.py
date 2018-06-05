@@ -6,6 +6,9 @@ import subprocess
 config_folder = 'datafiles/classification/'
 log = 'logs/classification_db.txt'
 
+if not os.path.isdir('logs'):
+    os.mkdir('logs')
+
 
 def download_files():
     dataset_folders = list()
