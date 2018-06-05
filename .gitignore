@@ -2,6 +2,7 @@
 *.data*
 uci/
 data/
+*.csv
 
 # Logs
 logs/
