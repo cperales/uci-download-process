@@ -87,6 +87,7 @@ for directory in folders:
                                      header=None,
                                      skiprows=skiprows)
                     df[df.columns[-1]] = pd.Series([e.split('.|')[0] for e in df[df.columns[-1]]])
+                    df[df.columns[-1]] = pd.Series([e.split('[')[0] for e in df[df.columns[-1]]])
                 except pd.errors.ParserError as e:
                     # Maybe there is a easier way
                     sk = int(re.findall(r'\d+', re.findall(r'line \d+', str(e))[0])[0]) - 1
@@ -125,10 +126,10 @@ for directory in folders:
                 df[final_column] = pd.Series(df[final_column] +
                                              (1 - np.min(df[final_column].values)),
                                              dtype=np.int)
-
                 # Replacing missing by NaN
                 for m in missing:
                     df = df.replace(m, np.nan)
+
                 # Removing depending on how many data are left out
                 n_len = len(df.index)  # Length of instances
                 m_len = len(df.columns)  # Length of features

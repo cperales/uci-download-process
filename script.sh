@@ -3,7 +3,7 @@ echo 'Downloading the classification datasets...'
 python download_data.py
 echo
 echo 'Processing the datasets...'
-python convert_data.py
+python process_data.py
 echo
 echo 'K folding the datasets...'
 python k_folding.py
