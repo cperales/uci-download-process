@@ -20,8 +20,9 @@ data_folder = 'data'
 processed_folder = 'processed/'
 log = 'logs/kfold_error.txt'
 
-if not os.path.isdir(data_folder):
-    os.mkdir(data_folder)
+if os.path.isdir(data_folder):
+    shutil.rmtree(data_folder)
+os.mkdir(data_folder)
 
 
 def creating_nested_folders():
@@ -113,8 +114,5 @@ def k_folding(file=None):
 
 
 if __name__ == '__main__':
-    print('Creating nested folders...')
     creating_nested_folders()
-    print('K folding the datasets...')
     k_folding()
-    # k_folding(file=log)

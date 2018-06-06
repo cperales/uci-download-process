@@ -1,6 +1,12 @@
+import os
 import glob
 import pandas as pd
 import numpy as np
+
+description_folder = 'description'
+
+if not os.path.isdir(description_folder):
+    os.mkdir(description_folder)
 
 full_data_files = glob.glob('data/*/*.data')
 data_files = [d.split('/')[2].split('.')[0] for d in full_data_files]
@@ -29,7 +35,8 @@ for d in full_data_files:
                       'Classes': n_classes,
                       'Class distribution': distribution})
 
-pd.DataFrame(data_list).to_csv('data_characteristics.csv',
+pd.DataFrame(data_list).to_csv(os.path.join(description_folder,
+                                            'data_description.csv'),
                                sep=';',
                                header=True,
                                columns=['Dataset',

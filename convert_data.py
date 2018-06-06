@@ -141,6 +141,10 @@ for directory in folders:
                 else:
                     df = df.dropna(axis=0)
 
+                if len(np.unique(df[final_column])) == 1:
+                    # Dropping NaN leaves just one class
+                    continue
+
                 if df[final_column].dtype == float:
                     df[final_column] = pd.Series(df[final_column], dtype=np.int)
 

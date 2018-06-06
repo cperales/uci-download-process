@@ -2,7 +2,10 @@ import os
 import pandas as pd
 from pylatex import Document, LongTable, MultiColumn
 
-df = pd.read_csv('data_characteristics.csv',
+description_folder = 'description'
+
+df = pd.read_csv(os.path.join(description_folder,
+                              'data_description.csv'),
                  sep=';',
                  header=0,
                  index_col='Dataset')
@@ -33,19 +36,36 @@ def genenerate_table(max_classes=10):
                     max = max_classes
                     finished = False
                     subrow = row.copy()
-                    subrow[-1] = subrow[-1][:max]
+                    # Select subtuple and removing last parenthesis
+                    subrow[-1] = str(subrow[-1][:max]).replace(')', ',')
                     data_table.add_row(subrow)
                     while finished is False:
                         last_element = row[-1][max:max + max_classes]
-                        subrow = ['', '', '', '', last_element]
-                        data_table.add_row(subrow)
+                        if len(last_element) == 1:
+                            # To string
+                            last_element = str(last_element)
+                            # Remove first and last parenthesis and comma
+                            last_element = last_element[1:-2]
+                        else:
+                            # To string
+                            last_element = str(last_element)
+                            # Remove first and last parenthesis
+                            last_element = last_element[1:-1]
                         max = max + max_classes
                         if max >= len(row[-1]):
                             finished = True
+                            last_element += ')'
+                        else:
+                            # Remove last parenthesis or comma if len is 1
+                            last_element = last_element[:-1]
+                        subrow = ['', '', '', '', last_element]
+                        data_table.add_row(subrow)
+
                 else:
                     data_table.add_row(row)
 
-    doc.generate_pdf("data_characteristics", clean_tex=True)
+    doc.generate_pdf(os.path.join(description_folder,
+                                  'data_description'), clean_tex=True)
 
 
 genenerate_table()
