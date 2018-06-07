@@ -156,8 +156,7 @@ for directory in folders:
                                   for i in range(len(df[c]))]
                         df[c] = pd.Series(df[c], dtype=np.float)
                     except ValueError:  # It was a string, need to be transformed
-                        df[c] = pd.Series(LabelEncoder().fit_transform(series_values),
-                                          dtype=np.float)
+                        df[c] = LabelEncoder().fit_transform(series_values)
 
                 # Saving the dataframe into processed folder
                 df.to_csv(''.join([processed_folder, data_file]), sep=' ', header=False, index=False)

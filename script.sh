@@ -9,7 +9,7 @@ echo 'K folding the datasets...'
 python k_folding.py
 echo
 echo 'Descripting the datasets...'
-python data_description.py
+python describe_data.py
 echo
 echo 'Creating a table in LaTeX with the characteristics...'
 python latex_table.py
