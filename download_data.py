@@ -1,13 +1,15 @@
 import configparser
 import os
-# import wget
+import shutil
 import subprocess
 
 config_folder = 'datafiles/classification/'
 log = 'logs/classification_db.txt'
+raw_data_folder = 'raw_data'
 
-if not os.path.isdir('logs'):
-    os.mkdir('logs')
+for folder in config_folder, raw_data_folder:
+    if not os.path.isdir(folder):
+        os.mkdir(folder)
 
 
 def download_files():
@@ -30,21 +32,28 @@ def download_files():
                             data_url = config['info']['data_url']
                             data_name = config['info']['name']
                             f.write(''.join([data_url, '\n']))
-                            final_filename = '/'.join([complete_folder, data_name])
+                            final_filename = os.path.join(complete_folder, data_name)
+                            # Download file
                             bash_command = ['wget', '-nc', data_url, '-O', final_filename]
                             subprocess.run(bash_command)
+                            # Copy file to raw data folder
+                            final_filename_2 = os.path.join(raw_data_folder, data_name)
+                            shutil.copyfile(final_filename, final_filename_2)
                         except Exception as e:
                             print(e)
 
 
 def remove_files():
+    """
+    Remove files from configuration folders.
+    """
     for folder in os.listdir(config_folder):
-        complete_folder = ''.join([config_folder, folder])
+        complete_folder = os.path.join(config_folder, folder)
         if os.path.isdir(complete_folder):  # It could be a .csv
             files = os.listdir(complete_folder)
             for file in files:
                 if '.ini' not in file:
-                    os.remove('/'.join([complete_folder, file]))
+                    os.remove(os.path.join(complete_folder, file))
 
 
 if __name__ == '__main__':

@@ -7,9 +7,9 @@ import numpy as np
 from sklearn.preprocessing import LabelEncoder
 
 config_folder = 'datafiles/classification/'
-processed_folder = 'processed/'
+processed_folder = 'processed_data/'
 log_conversion = 'logs/convert_error.txt'
-log_download =  'logs/download_error.txt'
+log_download = 'logs/download_error.txt'
 error_files = list()
 download_error = list()
 
