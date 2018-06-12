@@ -16,8 +16,8 @@ def warn(*args, **kwargs):
 warnings.warn = warn
 
 # # MERGING TRAINING AND SETS DATASETS .1 IN ONE FILE
-data_folder = 'data'
-processed_folder = 'processed/'
+data_folder = 'data/'
+processed_folder = 'processed_data/'
 log = 'logs/kfold_error.txt'
 
 if os.path.isdir(data_folder):
