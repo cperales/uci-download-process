@@ -65,7 +65,7 @@ def genenerate_table(max_classes=10):
                     data_table.add_row(row)
 
     doc.generate_pdf(os.path.join(description_folder,
-                                  'data_description'), clean_tex=True)
+                                  'data_description'), clean_tex=False)
 
 
 genenerate_table()

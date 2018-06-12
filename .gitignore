@@ -2,7 +2,7 @@
 *.data*
 uci/
 data/
-
+*.pdf
 
 # Logs
 logs/
