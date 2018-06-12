@@ -11,7 +11,7 @@ df = pd.read_csv(os.path.join(description_folder,
                  index_col='Dataset')
 
 
-def genenerate_table(max_classes=10):
+def genenerate_table(max_classes=3):
     geometry_options = {
         "margin": "1.00cm",
         "includeheadfoot": True
@@ -32,7 +32,7 @@ def genenerate_table(max_classes=10):
             for index in df.index.values:
                 row = [index] + df.loc[index].values.tolist()
                 row[-1] = eval(row[-1])
-                if len(row[-1]) > 10:
+                if len(row[-1]) > max_classes:
                     max = max_classes
                     finished = False
                     subrow = row.copy()
