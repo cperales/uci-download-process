@@ -3,6 +3,7 @@
 uci/
 data/
 *.pdf
+*.tex
 
 # Logs
 logs/
