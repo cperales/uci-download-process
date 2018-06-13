@@ -6,11 +6,10 @@ echo 'Processing the datasets...'
 python process_data.py
 echo
 echo 'K folding the datasets...'
-python k_folding.py
+python fold_data.py
 echo
-echo 'Descripting the datasets...'
+echo 'Describing the datasets (CSV, LaTeX and PDF)...'
 python describe_data.py
 echo
-echo 'Creating a table in LaTeX with the characteristics...'
-python latex_table.py
-echo
+echo 'DONE!'
+
