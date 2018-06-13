@@ -17,29 +17,13 @@ The datasets are not checked in to git in order to minimise the size of the repo
 
 #### Command line
 
-For downloading, use the following command from the root folder:
+Basically, after installing the virtual environment and the dependencies (explanation [here](https://github.com/cperales/PyRidge#how-to-install-it-within-a-virtual-environment) ), you just need to write the following order:
 
 ```bash
-python download_data.py
+bash script.sh
 ```
 
-And this sent the urls from data to `classification_db.txt`. If data
-was downloaded before, it won't be added again.
-
-For converting the downloaded files into the format described in
-the previous section (attributes separated by spaces, integer target
-at last position), run:
-
-```bash
-python convert_data.py
-```
-
-Eventually, processing data is finished with k folding, with `k=10`.
-
-```bash
-python k_folding.py
-```
-
+and this script in bash will execute the python scripts. They download the data from the urls specified in `datafiles`, process it and give information about them. Info files in [CSV](https://github.com/cperales/uci-download-process/blob/master/description/data_description.csv), LaTeX and PDF formats are generated.
 
 ## Guide to config files
 
