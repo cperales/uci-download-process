@@ -1,5 +1,7 @@
 # UCI Machine Learning Repository downloading and conversion scripts
 
+[![DOI](https://zenodo.org/badge/132050484.svg)](https://zenodo.org/badge/latestdoi/132050484)
+
 This is a script for converting [UCI Machine Learning Repository](http://archive.ics.uci.edu/ml/datasets.html) datasets (and some from other sources) into a common format. This Python repository is a kind of fork of Julia repository [JackDunnNZ/uci-data](https://github.com/JackDunnNZ/uci-data), from which configuration files are extracted. The UCI ML repository is a useful source for machine learning datasets for testing and benchmarking, but the format of datasets is not consistent. This means effort is required in order to make use of new datasets since they need to be read differently.
 
 Instead, the aim is to convert the datasets into a format to be read
