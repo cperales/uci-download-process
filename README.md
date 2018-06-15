@@ -13,17 +13,36 @@ This makes it easy to switch out datasets in ML problems, which is great when au
 
 The datasets are not checked in to git in order to minimise the size of the repository and to avoid rehosting the data. As such, the script downloads any missing datasets directly from UCI as it runs.
 
-### Running the script
+### Running the code
 
-#### Command line
+There are two ways of running the code. Easy/obscure way is to run
+first the `install_requirements.sh` script, using `bash`
 
-Basically, after installing the virtual environment and the dependencies (explanation [here](https://github.com/cperales/PyRidge#how-to-install-it-within-a-virtual-environment) ), you just need to write the following order:
+```bash
+bash install_requirements.sh
+```
+
+Which install the Python 3 requirements from `requirements.txt`.
+After that, the main script
 
 ```bash
 bash script.sh
 ```
 
-and this script in bash will execute the python scripts. They download the data from the urls specified in `datafiles`, process it and give information about them. Info files in [CSV](https://github.com/cperales/uci-download-process/blob/master/description/data_description.csv), LaTeX and PDF formats are generated.
+The other way is using virtual environment for Python 3, which can be
+done easily following an explanation
+[here](https://github.com/cperales/PyRidge#how-to-install-it-within-a-virtual-environment).
+Then, you just have to run the scripts in the main directory
+
+```bash
+python download_data.py
+python process_data.py
+python fold_data.py
+python describe_data.py
+```
+
+The data will be downloaded, processed, k-folded and described,
+in that order. Final folder will be `data`.
 
 ## Guide to config files
 
