@@ -17,10 +17,10 @@ optical-recognition-handwritten-digits,3823,64,10,376;389;380;389;387;376;377;38
 thyroid-disease-ann-thyroid,3772,21,3,93;191;3488
 chess-king-rook-vs-king-pawn,3196,36,2,1527;1669
 thyroid-disease-sick-euthyroid,3163,17,2,2870;293
-thyroid-disease-sick,2800,21,2,2629;171
+thyroid-disease-allrep,2800,21,4,2713;23;29;35
 thyroid-disease-allhypo,2800,21,4,154;2580;64;2
 thyroid-disease-allhyper,2800,21,4,8;7;62;2723
-thyroid-disease-allrep,2800,21,4,2713;23;29;35
+thyroid-disease-sick,2800,21,2,2629;171
 thyroid-disease-allbp,2800,21,3,9;124;2667
 thyroid-disease-dis,2800,21,2,45;2755
 seismic-bumps,2584,18,2,2414;170
@@ -40,9 +40,8 @@ blood-transfusion-service-center,748,4,2,570;178
 breast-cancer-wisconsin,699,8,2,458;241
 credit-approval,690,8,2,307;383
 balance-scale,625,4,3,49;288;288
-hill-valley-noise,606,100,2,307;299
 hill-valley,606,100,2,305;301
-indian-liver-patient,583,9,2,416;167
+hill-valley-noise,606,100,2,307;299
 breast-cancer-wisconsin-diagnostic,569,30,2,357;212
 climate-model-simulation-crashes,540,18,2,46;494
 thoracic-surgery,470,16,2,400;70
