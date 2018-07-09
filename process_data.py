@@ -4,7 +4,7 @@ import shutil
 import configparser
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import LabelEncoder, LabelBinarizer
 
 separators = {'comma': ',',
               '': r'\s+',
@@ -51,6 +51,8 @@ def process_data(config_folder,
                 else:
                     pass
             if config_file is not None and data_file is not None:
+                if 'acute' in data_file:
+                    print(data_file)
                 try:
                     # Read config file
                     config = configparser.ConfigParser()
@@ -162,9 +164,20 @@ def process_data(config_folder,
                         try:
                             series = [float(series_values[i])
                                       for i in range(len(df[c]))]
-                            df[c] = pd.Series(df[c], dtype=np.float)
+                            df[c] = pd.Series(series, dtype=np.float)
                         except ValueError:  # It was a string, need to be transformed
-                            df[c] = LabelEncoder().fit_transform(series_values)
+                            number_cat = len(np.unique(series_values))
+                            if number_cat == 1:  # It is unuseful
+                                df.drop(columns=c)
+                            elif number_cat == 2:
+                                df[c] = LabelEncoder().fit_transform(series_values)
+                            else:
+                                series_binarized = LabelBinarizer().fit_transform(series_values)
+                                series_binarized_t = series_binarized.transpose()
+                                df.drop(columns=c)
+                                for i in range(1, number_cat + 1):
+                                    c_label = '_'.join([str(c), str(i)])
+                                    df[c_label] = series_binarized_t[i - 1]
 
                     # Saving the dataframe into processed folder
                     df.to_csv(''.join([processed_folder, data_file]), sep=' ', header=False, index=False)
