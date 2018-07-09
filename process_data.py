@@ -51,7 +51,7 @@ def process_data(config_folder,
                 else:
                     pass
             if config_file is not None and data_file is not None:
-                if 'acute' in data_file:
+                if 'yeast' in data_file:
                     print(data_file)
                 try:
                     # Read config file
@@ -164,7 +164,7 @@ def process_data(config_folder,
                         try:
                             series = [float(series_values[i])
                                       for i in range(len(df[c]))]
-                            df[c] = pd.Series(series, dtype=np.float)
+                            df[c] = pd.Series(df[c], dtype=np.float)
                         except ValueError:  # It was a string, need to be transformed
                             number_cat = len(np.unique(series_values))
                             if number_cat == 1:  # It is unuseful
