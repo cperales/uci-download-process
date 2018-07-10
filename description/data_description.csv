@@ -42,6 +42,7 @@ credit-approval,690,11,2,633;57
 balance-scale,625,4,3,49;288;288
 hill-valley,606,100,2,305;301
 hill-valley-noise,606,100,2,307;299
+indian-liver-patient,583,9,2,416;167
 breast-cancer-wisconsin-diagnostic,569,30,2,357;212
 climate-model-simulation-crashes,540,18,2,46;494
 thoracic-surgery,470,30,2,453;17
