@@ -51,8 +51,6 @@ def process_data(config_folder,
                 else:
                     pass
             if config_file is not None and data_file is not None:
-                if 'yeast' in data_file:
-                    print(data_file)
                 try:
                     # Read config file
                     config = configparser.ConfigParser()
