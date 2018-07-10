@@ -15,17 +15,9 @@ def warn(*args, **kwargs):
 
 warnings.warn = warn
 
-# # MERGING TRAINING AND SETS DATASETS .1 IN ONE FILE
-data_folder = 'data/'
-processed_folder = 'processed_data/'
-log = 'logs/kfold_error.txt'
 
-if os.path.isdir(data_folder):
-    shutil.rmtree(data_folder)
-os.mkdir(data_folder)
-
-
-def creating_nested_folders():
+def creating_nested_folders(processed_folder,
+                            data_folder):
     # Saving the dataframe into nested folder
     for file in os.listdir(processed_folder):
         if '.data' in file:
@@ -38,7 +30,7 @@ def creating_nested_folders():
             shutil.copy(src_folder, end_folder)
 
 
-def dir_file(file=None):
+def dir_file(data_folder, file=None):
     dir_file_pairs = list()
 
     if file is None:
@@ -58,12 +50,12 @@ def dir_file(file=None):
     return dir_file_pairs
 
 
-def k_folding(file=None):
-    dir_file_pairs = dir_file(file)
+def k_folding(data_folder, log_file, file=None):
+    dir_file_pairs = dir_file(data_folder, file)
 
     # SPLITTING ONE DATASET FILE IN N_FOLDS
     n_fold = 10
-    with open(log, 'w') as f:
+    with open(log_file, 'w') as f:
         for dir_file_pair in dir_file_pairs:
             try:
                 dir_name, file_name = dir_file_pair
@@ -114,5 +106,14 @@ def k_folding(file=None):
 
 
 if __name__ == '__main__':
-    creating_nested_folders()
-    k_folding()
+    data_folder = 'data/'
+    processed_folder = 'processed_data/'
+    log_file = 'logs/kfold_error.txt'
+
+    if os.path.isdir(data_folder):
+        shutil.rmtree(data_folder)
+    os.mkdir(data_folder)
+
+    creating_nested_folders(processed_folder,
+                            data_folder)
+    k_folding(data_folder, log_file)

@@ -3,20 +3,14 @@ import os
 import shutil
 import subprocess
 
-config_folder = 'datafiles/classification/'
-log = 'logs/classification_db.txt'
-raw_data_folder = 'raw_data'
 
-for folder in config_folder, raw_data_folder:
-    if not os.path.isdir(folder):
-        os.mkdir(folder)
-
-
-def download_files():
+def download_files(config_folder,
+                   log_file,
+                   raw_data_folder):
     dataset_folders = list()
     list_files = list()
 
-    with open(log, 'w') as f:
+    with open(log_file, 'w') as f:
         for folder in os.listdir(config_folder):
             complete_folder = ''.join([config_folder, folder])
             if os.path.isdir(complete_folder):  # It could be a .csv
@@ -43,7 +37,7 @@ def download_files():
                             print(e)
 
 
-def remove_files():
+def remove_files(config_folder):
     """
     Remove files from configuration folders.
     """
@@ -57,4 +51,16 @@ def remove_files():
 
 
 if __name__ == '__main__':
-    download_files()
+    config_folder = 'datafiles/classification/'
+    log_file = 'logs/classification_db.txt'
+    raw_data_folder = 'raw_data'
+
+    for folder in config_folder, raw_data_folder:
+        if not os.path.isdir(folder):
+            os.mkdir(folder)
+
+    # remove_files(config_folder)
+
+    download_files(config_folder,
+                   log_file,
+                   raw_data_folder)

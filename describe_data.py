@@ -6,109 +6,115 @@ from pylatex import Document, LongTable
 from copy import deepcopy
 
 
-description_folder = 'description'
+def description(full_data_files, description_folder):
+    data_list = list()
+    for d in full_data_files:
+        name = d.split('/')[2].split('.')[0]
+        df = pd.read_csv(d,
+                         sep='\s+',
+                         header=None)
+        lines, columns = df.shape
+        attribute = columns - 1  # Minus one because of target
+        last_pos = attribute
+        classes = np.unique(df[last_pos])
+        n_classes = len(classes)
+        distribution = tuple([len(df[df[last_pos] == c]) for c in classes])
+        data_list.append({'Dataset': name,
+                          'Size': lines,
+                          'Attributes': attribute,
+                          'Classes': n_classes,
+                          'Class distribution': distribution})
 
-if not os.path.isdir(description_folder):
-    os.mkdir(description_folder)
+    df = pd.DataFrame(data_list)
+    df = df.sort_values('Size', ascending=False)
+    cols = ['Dataset',
+            'Size',
+            'Attributes',
+            'Classes',
+            'Class distribution']
+    df = df[cols]
+    df_copy = deepcopy(df)
+    df_copy['Class distribution'] = [str(value).replace(', ', ';').replace(')', '').replace('(', '')
+                                     for value in df_copy['Class distribution']]
+    df_copy.to_csv(os.path.join(description_folder,
+                                'data_description.csv'),
+                   sep=',',
+                   header=True,
+                   columns=['Dataset',
+                            'Size',
+                            'Attributes',
+                            'Classes',
+                            'Class distribution'],
+                   index=False)
 
-full_data_files = glob.glob('data/*/*.data')
-data_files = [d.split('/')[2].split('.')[0] for d in full_data_files]
+    # # LaTeX
+    df = df.set_index(['Dataset'])
 
-data_list = list()
-for d in full_data_files:
-    name = d.split('/')[2].split('.')[0]
-    df = pd.read_csv(d,
-                     sep='\s+',
-                     header=None)
-    lines, columns = df.shape
-    attribute = columns - 1  # Minus one because of target
-    last_pos = attribute
-    classes = np.unique(df[last_pos])
-    n_classes = len(classes)
-    distribution = tuple([len(df[df[last_pos] == c]) for c in classes])
-    data_list.append({'Dataset': name,
-                      'Size': lines,
-                      'Attributes': attribute,
-                      'Classes': n_classes,
-                      'Class distribution': distribution})
+    # Max classes per row
+    max_classes = 3
+    geometry_options = {
+        "margin": "1.00cm",
+        "includeheadfoot": True
+    }
+    doc = Document(page_numbers=True, geometry_options=geometry_options)
 
-df = pd.DataFrame(data_list)
-df = df.sort_values('Size', ascending=False)
-cols = ['Dataset',
-        'Size',
-        'Attributes',
-        'Classes',
-        'Class distribution']
-df = df[cols]
-df_copy = deepcopy(df)
-df_copy['Class distribution'] = [str(value).replace(', ', ';').replace(')', '').replace('(', '')
-                                 for value in df_copy['Class distribution']]
-df_copy.to_csv(os.path.join(description_folder,
-                            'data_description.csv'),
-               sep=',',
-               header=True,
-               columns=['Dataset',
-                        'Size',
-                        'Attributes',
-                        'Classes',
-                        'Class distribution'],
-               index=False)
-
-# # LaTeX
-df = df.set_index(['Dataset'])
-
-# Max classes per row
-max_classes = 3
-geometry_options = {
-    "margin": "1.00cm",
-    "includeheadfoot": True
-}
-doc = Document(page_numbers=True, geometry_options=geometry_options)
-
-# Generate data table
-with doc.create(LongTable("l l l l l")) as data_table:
-        data_table.add_hline()
-        header = ["Dataset",
-                  "Size",
-                  "#Attr.",
-                  "#Classes",
-                  "Class distribution"]
-        data_table.add_row(header)
-        data_table.add_hline()
-        data_table.add_hline()
-        for index in df.index.values:
-            row = [index] + df.loc[index].values.tolist()
-            if len(row[-1]) > max_classes:
-                max = max_classes
-                finished = False
-                subrow = row.copy()
-                # Select subtuple and removing last parenthesis
-                subrow[-1] = str(subrow[-1][:max]).replace(')', ',')
-                data_table.add_row(subrow)
-                while finished is False:
-                    last_element = row[-1][max:max + max_classes]
-                    if len(last_element) == 1:
-                        # To string
-                        last_element = str(last_element)
-                        # Remove first and last parenthesis and comma
-                        last_element = last_element[1:-2]
-                    else:
-                        # To string
-                        last_element = str(last_element)
-                        # Remove first and last parenthesis
-                        last_element = last_element[1:-1]
-                    max = max + max_classes
-                    if max >= len(row[-1]):
-                        finished = True
-                        last_element += ')'
-                    else:
-                        # Remove last parenthesis or comma if len is 1
-                        last_element = last_element[:-1]
-                    subrow = ['', '', '', '', last_element]
+    # Generate data table
+    with doc.create(LongTable("l l l l l")) as data_table:
+            data_table.add_hline()
+            header = ["Dataset",
+                      "Size",
+                      "#Attr.",
+                      "#Classes",
+                      "Class distribution"]
+            data_table.add_row(header)
+            data_table.add_hline()
+            data_table.add_hline()
+            for index in df.index.values:
+                row = [index] + df.loc[index].values.tolist()
+                if len(row[-1]) > max_classes:
+                    max = max_classes
+                    finished = False
+                    subrow = row.copy()
+                    # Select subtuple and removing last parenthesis
+                    subrow[-1] = str(subrow[-1][:max]).replace(')', ',')
                     data_table.add_row(subrow)
+                    while finished is False:
+                        last_element = row[-1][max:max + max_classes]
+                        if len(last_element) == 1:
+                            # To string
+                            last_element = str(last_element)
+                            # Remove first and last parenthesis and comma
+                            last_element = last_element[1:-2]
+                        else:
+                            # To string
+                            last_element = str(last_element)
+                            # Remove first and last parenthesis
+                            last_element = last_element[1:-1]
+                        max = max + max_classes
+                        if max >= len(row[-1]):
+                            finished = True
+                            last_element += ')'
+                        else:
+                            # Remove last parenthesis or comma if len is 1
+                            last_element = last_element[:-1]
+                        subrow = ['', '', '', '', last_element]
+                        data_table.add_row(subrow)
 
-            else:
-                data_table.add_row(row)
+                else:
+                    data_table.add_row(row)
 
-doc.generate_pdf(os.path.join(description_folder,
-                              'data_description'), clean_tex=False)
+    doc.generate_pdf(os.path.join(description_folder,
+                                  'data_description'), clean_tex=False)
+
+if __name__ == '__main__':
+
+    description_folder = 'description'
+    data_folder = 'data'
+
+    if not os.path.isdir(description_folder):
+        os.mkdir(description_folder)
+
+    full_data_files = glob.glob(data_folder + '/*/*.data')
+    data_files = [d.split('/')[2].split('.')[0] for d in full_data_files]
+
+    description(full_data_files, description_folder)
