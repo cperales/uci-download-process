@@ -157,7 +157,12 @@ def process_data(config_folder,
                     if df[final_column].dtype == float:
                         df[final_column] = pd.Series(df[final_column], dtype=np.int)
 
-                    for c in df.columns[:final_column]:
+                    # Store label column
+                    label_column = df[final_column].copy()
+                    df = df.drop(columns=final_column)
+                    columnas = list(df.columns.copy())
+
+                    for c in columnas:
                         series_values = df[c].values
                         try:
                             series = [float(series_values[i])
@@ -165,17 +170,20 @@ def process_data(config_folder,
                             df[c] = pd.Series(df[c], dtype=np.float)
                         except ValueError:  # It was a string, need to be transformed
                             number_cat = len(np.unique(series_values))
+                            df = df.drop(columns=c)
                             if number_cat == 1:  # It is unuseful
-                                df.drop(columns=c)
+                                pass
                             elif number_cat == 2:
                                 df[c] = LabelEncoder().fit_transform(series_values)
                             else:
                                 series_binarized = LabelBinarizer().fit_transform(series_values)
                                 series_binarized_t = series_binarized.transpose()
-                                df.drop(columns=c)
                                 for i in range(1, number_cat + 1):
                                     c_label = '_'.join([str(c), str(i)])
                                     df[c_label] = series_binarized_t[i - 1]
+
+                    # Restore label column. With this label, we assure this is at the end
+                    df['Target'] = label_column
 
                     # Saving the dataframe into processed folder
                     df.to_csv(''.join([processed_folder, data_file]), sep=' ', header=False, index=False)
