@@ -51,7 +51,7 @@ def description(full_data_files, description_folder):
     df = df.set_index(['Dataset'])
 
     # Max classes per row
-    max_classes = 3
+    max_classes = np.inf
     geometry_options = {
         "margin": "1.00cm",
         "includeheadfoot": True
@@ -106,6 +106,7 @@ def description(full_data_files, description_folder):
     doc.generate_pdf(os.path.join(description_folder,
                                   'data_description'), clean_tex=False)
 
+
 if __name__ == '__main__':
 
     description_folder = 'description'
@@ -115,6 +116,6 @@ if __name__ == '__main__':
         os.mkdir(description_folder)
 
     full_data_files = glob.glob(data_folder + '/*/*.data')
-    data_files = [d.split('/')[2].split('.')[0] for d in full_data_files]
+    # data_files = [d.split('/')[2].split('.')[0] for d in full_data_files]
 
     description(full_data_files, description_folder)
