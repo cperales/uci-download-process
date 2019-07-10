@@ -5,8 +5,8 @@ import subprocess
 
 
 def download_files(config_folder,
-                   log_file,
-                   raw_data_folder):
+                   raw_data_folder,
+                   log_file):
     dataset_folders = list()
     list_files = list()
 
@@ -50,17 +50,42 @@ def remove_files(config_folder):
                     os.remove(os.path.join(complete_folder, file))
 
 
+def check_folder(folder):
+    """
+    Create folder is necessary.
+
+    :param str folder:
+    """
+    if not os.path.isdir(folder):
+        os.mkdir(folder)
+
+
+def remove_folder(folder):
+    """
+    Remove folder if it exists.
+
+    :param str folder:
+    """
+    if os.path.isdir(folder):
+        shutil.rmtree(folder, ignore_errors=True)
+
+
 if __name__ == '__main__':
-    config_folder = 'datafiles/classification/'
-    log_file = 'logs/classification_db.txt'
+    config_folders = ['datafiles/classification/', 'datafiles/regression/']
+    # config_folders = ['datafiles/regression/']
+    log_file = 'logs/db.txt'
     raw_data_folder = 'raw_data'
 
-    for folder in config_folder, raw_data_folder:
-        if not os.path.isdir(folder):
-            os.mkdir(folder)
+    # Remove and create folder, for a fresh raw data
+    remove_folder(raw_data_folder)
+    check_folder(raw_data_folder)
 
-    # remove_files(config_folder)
+    for config_folder in config_folders:
+        data_type = config_folder.split('/')[1]
+        raw_folder = os.path.join(raw_data_folder, data_type)
+        check_folder(raw_folder)
 
-    download_files(config_folder,
-                   log_file,
-                   raw_data_folder)
+        # remove_files(config_folder)
+        download_files(config_folder=config_folder,
+                       raw_data_folder=raw_folder,
+                       log_file=log_file)

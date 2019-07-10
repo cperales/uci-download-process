@@ -5,7 +5,8 @@ import numpy as np
 import warnings
 import math
 import os
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, KFold
+from download_data import check_folder
 
 
 # Ignore warnings
@@ -21,9 +22,10 @@ def creating_nested_folders(processed_folder,
     # Saving the dataframe into nested folder
     for file in os.listdir(processed_folder):
         if '.data' in file:
+            # Data folder
             src_folder = os.path.join(processed_folder, file)
             folder_name = file.replace('.data', '')
-            end_folder = os.path.join(data_folder, folder_name)
+            end_folder = os.path.join(data_type_folder, folder_name)
             if os.path.isdir(end_folder):
                 shutil.rmtree(end_folder)
             os.mkdir(end_folder)
@@ -36,7 +38,11 @@ def dir_file(data_folder, file=None):
     if file is None:
         listdir = os.listdir(data_folder)
     else:
-        listdir = [line.replace('.data\n', '').replace('processed/', '') for line in open(file, 'r')]
+        listdir = list()
+        for line in open(file, 'r'):
+            new_line = line.replace('.data\n', '')
+            new_new_line = new_line.replace('processed/', '')
+            listdir.append(new_new_line)
 
     for dir_name in listdir:
         full_dir_name = os.path.join(data_folder, dir_name)
@@ -50,7 +56,7 @@ def dir_file(data_folder, file=None):
     return dir_file_pairs
 
 
-def k_folding(data_folder, log_file, file=None):
+def k_folding(data_folder, log_file, file=None, classification=True):
     dir_file_pairs = dir_file(data_folder, file)
 
     # SPLITTING ONE DATASET FILE IN N_FOLDS
@@ -75,8 +81,11 @@ def k_folding(data_folder, log_file, file=None):
                 # Shuffle false in order to preserve
                 i = 0
                 file = file_name.replace('.data', '')
-                skf = StratifiedKFold(n_splits=n_fold, shuffle=False)
-                for train_index, test_index in skf.split(X=x, y=y):
+                if classification is True:
+                    kf = StratifiedKFold(n_splits=n_fold, shuffle=False)
+                else:
+                    kf = KFold(n_splits=n_fold, shuffle=True)
+                for train_index, test_index in kf.split(X=x, y=y):
                     x_train_fold = x.iloc[train_index]
                     y_train_fold = y.iloc[train_index]
                     train_fold = pd.concat([x_train_fold, y_train_fold], axis=1)
@@ -107,13 +116,22 @@ def k_folding(data_folder, log_file, file=None):
 
 if __name__ == '__main__':
     data_folder = 'data/'
-    processed_folder = 'processed_data/'
+    processed_folders = ['processed_data/regression', 'processed_data/classification']
     log_file = 'logs/kfold_error.txt'
 
     if os.path.isdir(data_folder):
         shutil.rmtree(data_folder)
     os.mkdir(data_folder)
 
-    creating_nested_folders(processed_folder,
-                            data_folder)
-    k_folding(data_folder, log_file)
+    for processed_folder in processed_folders:
+        # Data  type folder
+        data_type = os.path.split(processed_folder)[1]
+        if 'classification' in data_type:
+            classification = True
+        else:
+            classification = False
+        data_type_folder = os.path.join(data_folder, data_type)
+        check_folder(data_type_folder)
+        creating_nested_folders(processed_folder,
+                                data_type_folder)
+        k_folding(data_type_folder, log_file, classification=classification)
