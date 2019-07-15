@@ -132,9 +132,13 @@ def process_data(config_folder,
                         except TypeError as e:
                             df[final_column] = df[final_column].factorize()[0]
 
-                    df[final_column] = pd.Series(df[final_column] +
-                                                 (1 - np.min(df[final_column].values)),
-                                                 dtype=np.int)
+                    if 'regression' in config_folder:
+                        df[final_column] = pd.Series(df[final_column],
+                                                     dtype=np.float)
+                    else:
+                        df[final_column] = pd.Series(df[final_column] +
+                                                     (1 - np.min(df[final_column].values)),
+                                                     dtype=np.int)
                     # Replacing missing by NaN
                     for m in missing:
                         df = df.replace(m, np.nan)
@@ -154,9 +158,6 @@ def process_data(config_folder,
                     if len(np.unique(df[final_column])) == 1:
                         # Dropping NaN leaves just one class
                         continue
-
-                    if df[final_column].dtype == float:
-                        df[final_column] = pd.Series(df[final_column], dtype=np.int)
 
                     # Store label column
                     label_column = df[final_column].copy()
@@ -272,8 +273,8 @@ def log_download_error(log_download, download_error):
 if __name__ == '__main__':
     log_process = 'logs/convert_error.txt'
     log_download = 'logs/download_error.txt'
-    config_folders = ['datafiles/regression', 'datafiles/classification']
-    # config_folders = ['datafiles/classification']
+    # config_folders = ['datafiles/regression', 'datafiles/classification']
+    config_folders = ['datafiles/regression']
     processed_data_folder = 'processed_data/'
 
     # Remove and create folder, for a fresh raw data
