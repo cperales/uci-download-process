@@ -8,6 +8,7 @@ from sklearn.preprocessing import LabelEncoder, LabelBinarizer
 from download_data import check_folder, remove_folder
 
 separators = {'comma': ',',
+              ',': ',',
               '': r'\s+',
               ';': ';'}
 
@@ -83,7 +84,7 @@ def process_data(config_folder,
                                 index_col.append(i - 1)
                     # Read data
                     try:
-                        df = pd.read_csv('/'.join([full_dir, data_file]),
+                        df = pd.read_csv(os.path.join(full_dir, data_file),
                                          sep=sep,
                                          index_col=index_col,
                                          # header=header,
