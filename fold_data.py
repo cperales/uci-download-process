@@ -65,6 +65,7 @@ def k_folding(data_folder, log_file, file=None, classification=True):
         for dir_file_pair in dir_file_pairs:
             try:
                 dir_name, file_name = dir_file_pair
+                print('Folding {}'.format(file_name))
                 df_file = pd.read_csv(os.path.join(dir_name, file_name),
                                       sep='\s+',
                                       header=None)
