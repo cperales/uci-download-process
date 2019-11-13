@@ -129,7 +129,8 @@ def process_data(config_folder,
                     if df[final_column].dtype != int and df[final_column].dtype != float:
                         le = LabelEncoder()
                         try:
-                            df[final_column] = le.fit_transform(df[final_column])
+                            df[final_column] = le.fit_transform([str(e).replace(' ', '')
+                                                                 for e in df[final_column]])
                         except TypeError as e:
                             df[final_column] = df[final_column].factorize()[0]
 
@@ -147,14 +148,35 @@ def process_data(config_folder,
                     # Removing depending on how many data are left out
                     n_len = len(df.index)  # Length of instances
                     m_len = len(df.columns)  # Length of features
-                    n_len_rm_rows = len(df.dropna(axis=0).index)  # Length of instances when rows are removed
-                    m_len_rm_rows = len(df.dropna(axis=0).columns)  # Length of features when columns are removed
-                    n_len_rm_cols = len(df.dropna(axis=1).index)  # Length of instances when columns are removed
-                    m_len_rm_cols = len(df.dropna(axis=1).columns)  # Length of features when columns are removed
-                    if (n_len_rm_cols > (2 * n_len_rm_rows) and (2 * m_len_rm_cols) > m_len) or n_len_rm_rows == 0:
-                        df = df.dropna(axis=1)
+                    # Drop NaN by rows
+                    df_dropna_0 = df.dropna(axis=0)
+                    if len(df_dropna_0) > 0:
+                        _, label_counts_0 = np.unique(df_dropna_0[final_column],
+                                                      return_counts=True)
+                        min_label_counts_0 = np.min(label_counts_0)
                     else:
-                        df = df.dropna(axis=0)
+                        min_label_counts_0 = 0
+                    # Drop Nan by columns
+                    df_dropna_1 = df.dropna(axis=1)
+                    _, label_counts_1 = np.unique(df_dropna_1[final_column],
+                                                  return_counts=True)
+                    min_label_counts_1 = np.min(label_counts_1)
+
+                    n_len_rm_rows = len(df_dropna_0.index)  # Length of instances when rows are removed
+                    m_len_rm_rows = len(df_dropna_0.columns)  # Length of features when columns are removed
+                    n_len_rm_cols = len(df_dropna_1.index)  # Length of instances when columns are removed
+                    m_len_rm_cols = len(df_dropna_1.columns)  # Length of features when columns are removed
+                    if min_label_counts_0 < 2:
+                        if min_label_counts_1 >= 2:
+                            df = df_dropna_1
+                        else:
+                            raise ValueError('Removing NaNs gives more uncertainty')
+                    elif min_label_counts_1 < 2:
+                        df = df_dropna_0
+                    elif (n_len_rm_cols > (2 * n_len_rm_rows) and (2 * m_len_rm_cols) > m_len) or n_len_rm_rows == 0:
+                        df = df_dropna_1
+                    else:
+                        df = df_dropna_0
 
                     if len(np.unique(df[final_column])) == 1:
                         # Dropping NaN leaves just one class
@@ -275,7 +297,7 @@ if __name__ == '__main__':
     log_process = 'logs/convert_error.txt'
     log_download = 'logs/download_error.txt'
     # config_folders = ['datafiles/regression', 'datafiles/classification']
-    config_folders = ['datafiles/regression']
+    config_folders = ['datafiles/classification']
     processed_data_folder = 'processed_data/'
 
     # Remove and create folder, for a fresh raw data

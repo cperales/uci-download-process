@@ -65,7 +65,7 @@ def k_folding(data_folder, log_file, file=None, classification=True):
         for dir_file_pair in dir_file_pairs:
             try:
                 dir_name, file_name = dir_file_pair
-                print('Folding {}'.format(file_name))
+                # print('Folding {}'.format(file_name))
                 df_file = pd.read_csv(os.path.join(dir_name, file_name),
                                       sep='\s+',
                                       header=None)
@@ -74,6 +74,8 @@ def k_folding(data_folder, log_file, file=None, classification=True):
                 y = df_file[[target_position]]
                 # Testing if there is enough instances for n fold
                 count = [np.count_nonzero(y == label) for label in np.unique(y)]
+                if np.min(count) < 2:
+                    raise ValueError('Not enough elements of one label')
                 rep = np.max(count)  # If maximum is not enough to n fold
                 if n_fold > rep:
                     times = math.ceil(n_fold / rep)
@@ -109,7 +111,8 @@ def k_folding(data_folder, log_file, file=None, classification=True):
 
                     i += 1
             except ValueError as e:
-                print('{} can\'t be stratified'.format(file_name))
+                print(e, ', '
+                         'so {} can\'t be stratified'.format(file_name))
                 f.write(os.path.join('processed/', file_name))
                 f.write('\n')
                 shutil.rmtree(dir_name)
@@ -118,7 +121,7 @@ def k_folding(data_folder, log_file, file=None, classification=True):
 if __name__ == '__main__':
     data_folder = 'data/'
     # processed_folders = ['processed_data/regression', 'processed_data/classification']
-    processed_folders = ['processed_data/regression']
+    processed_folders = ['processed_data/classification']
     log_file = 'logs/kfold_error.txt'
 
     if os.path.isdir(data_folder):

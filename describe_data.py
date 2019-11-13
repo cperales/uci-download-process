@@ -18,7 +18,9 @@ def description(full_data_files, description_folder):
         last_pos = attribute
         classes = np.unique(df[last_pos])
         n_classes = len(classes)
-        distribution = tuple([len(df[df[last_pos] == c]) for c in classes])
+        distribution_list = [len(df[df[last_pos] == c]) for c in classes]
+        distribution_list.sort(reverse=True)
+        distribution = tuple(distribution_list)
         data_list.append({'Dataset': name,
                           'Size': lines,
                           'Attributes': attribute,
@@ -110,7 +112,7 @@ def description(full_data_files, description_folder):
 if __name__ == '__main__':
 
     description_folder = 'description'
-    data_folder = 'data'
+    data_folder = 'data/classification'
 
     if not os.path.isdir(description_folder):
         os.mkdir(description_folder)
