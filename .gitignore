@@ -4,6 +4,8 @@ uci/
 data/
 *.pdf
 *.tex
+*.names
+*.test
 
 # Logs
 logs/

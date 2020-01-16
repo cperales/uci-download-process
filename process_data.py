@@ -9,10 +9,21 @@ from download_data import check_folder, remove_folder
 
 separators = {'comma': ',',
               ',': ',',
+              ', ': ', ',
               '': r'\s+',
-              ';': ';'}
+              ' ': r'\s+',
+              ';': ';',
+              ',|': r'\,|\|',
+              ',[': r'\,|\['}
 
-missing = ['?', '-', '*', '']
+missing = {'?': np.nan,
+           '-': np.nan,
+           '*': np.nan,
+           '': np.nan,
+           '#DIV/0!': np.nan}
+
+
+min_target = 5
 
 
 def process_data(config_folder,
@@ -41,6 +52,8 @@ def process_data(config_folder,
 
     # Scroll through folders
     for directory in folders:
+        # for directory in ['flags']:
+        # print('Now', directory)
         config_file = None
         data_file = None
         full_dir = os.path.join(config_folder, directory)
@@ -61,71 +74,94 @@ def process_data(config_folder,
                     # config.read('/'.join([full_dir, config_file]))
                     sep = separators[config['info']['separator']]
                     # Does it have header?
-                    header = config['info']['header_lines']
-                    if header == '':
+                    header = config['info']['header']
+                    skiprows = config.get('info', 'skiprows', fallback='')
+                    if header == '' or header == '0':
                         header = None
+                    else:
+                        header = int(header) - 1
+                    if skiprows == '' or header == '0':
                         skiprows = None
                     else:
-                        skiprows = int(header)
-                        header = int(header) - 1
-                        if header < 0:
-                            header = None
+                        skiprows = int(skiprows)
                     # Does it have index?
                     index = config['info']['id_indices']
                     if index == '':  # There is no index
                         index_col = None
                     else:  # It could be one or several indexes
-                        index = eval(index)
-                        if isinstance(index, int):  # Just one index
-                            index_col = index - 1
-                        else:  # Several indexes
-                            index_col = list()
-                            for i in index:
-                                index_col.append(i - 1)
+                        index_col = [int(i) - 1 for i in index.split(',')]
+                        # if isinstance(index, int):  # Just one index
+                        #     index_col = index - 1
+                        # else:  # Several indexes
+                        #     index_col = list()
+                        #     for i in index:
+                        #         index_col.append(i - 1)
+
+                    # Load only columns needed
+                    label_column = int(config['info']['target_index']) - 1  # In python, index begins at 0
+                    categoric_indices = config['info']['categoric_indices']
+                    if categoric_indices == '':
+                        categoric_indices = list()
+                    else:
+                        categoric_indices = [int(i) - 1 for i in categoric_indices.split(',')]
+                    value_indices = config['info']['value_indices']
+                    if value_indices == '':
+                        value_indices = list()
+                    else:
+                        value_indices = [int(i) - 1 for i in value_indices.split(',')]
+                    indices = categoric_indices + value_indices + [label_column]
+                    if index_col is not None:
+                        indices += index_col
+                    indices = list(set(indices))
                     # Read data
                     try:
                         df = pd.read_csv(os.path.join(full_dir, data_file),
                                          sep=sep,
                                          index_col=index_col,
-                                         # header=header,
+                                         usecols=indices,
                                          header=None,
-                                         skiprows=skiprows)
-                    except IndexError:  # In some datasets, last column ins class.|index
-                        df = pd.read_csv('/'.join([full_dir, data_file]),
-                                         sep=sep,
-                                         # header=header,
-                                         header=None,
-                                         skiprows=skiprows)
-                        df[df.columns[-1]] = pd.Series([e.split('.|')[0] for e in df[df.columns[-1]]])
-                        df[df.columns[-1]] = pd.Series([e.split('[')[0] for e in df[df.columns[-1]]])
+                                         skiprows=skiprows,
+                                         engine='python')
                     except pd.errors.ParserError as e:
                         # Maybe there is a easier way
                         sk = int(re.findall(r'\d+', re.findall(r'line \d+', str(e))[0])[0]) - 1
-                        df = pd.read_csv('/'.join([full_dir, data_file]),
+                        df = pd.read_csv(os.path.join(full_dir, data_file),
                                          sep=sep,
                                          index_col=index_col,
-                                         # header=header,
                                          header=None,
+                                         usecols=indices,
                                          skiprows=[skiprows, sk])
                     except UnicodeDecodeError as e:
-                        df = pd.read_csv('/'.join([full_dir, data_file]),
+                        df = pd.read_csv(os.path.join(full_dir, data_file),
                                          sep=sep,
                                          index_col=index_col,
-                                         # header=header,
                                          header=None,
                                          skiprows=skiprows,
+                                         usecols=indices,
                                          encoding='utf-16le')
+                    if header is not None:
+                        df = df.iloc[header + 1:]
                     # Changing label to last column
                     final_column = df.columns[-1]
-                    label_column = int(config['info']['target_index']) - 1  # In python, index begins at 0
+                    sus = 0
                     if label_column != final_column:
                         if label_column not in df.columns:
                             raise KeyError('Label index {} is not in columns {}'.format(label_column, df.columns))
                         a = df[final_column].copy()
                         df[final_column] = df[label_column].copy()
                         df[label_column] = a
+                        label_column = final_column
+
+                    # Rename columns
+                    range_columns = np.arange(len(df.columns))
+                    df.columns = range_columns
+                    label_column = final_column = df.columns[-1]
 
                     # Now, final column is the column for the label
+                    unique_target, unique_count = np.unique(df[label_column], return_counts=True)
+                    if np.min(unique_count) < min_target:
+                        raise ValueError('Original data doesn\'t has poor class distribution,', np.min(unique_count))
+
                     if df[final_column].dtype != int and df[final_column].dtype != float:
                         le = LabelEncoder()
                         try:
@@ -141,64 +177,73 @@ def process_data(config_folder,
                         df[final_column] = pd.Series(df[final_column] +
                                                      (1 - np.min(df[final_column].values)),
                                                      dtype=np.int)
-                    # Replacing missing by NaN
-                    for m in missing:
-                        df = df.replace(m, np.nan)
-
-                    # Removing depending on how many data are left out
-                    n_len = len(df.index)  # Length of instances
-                    m_len = len(df.columns)  # Length of features
-                    # Drop NaN by rows
-                    df_dropna_0 = df.dropna(axis=0)
-                    if len(df_dropna_0) > 0:
-                        _, label_counts_0 = np.unique(df_dropna_0[final_column],
-                                                      return_counts=True)
-                        min_label_counts_0 = np.min(label_counts_0)
+                    # Store label column
+                    label_column = df[final_column].copy()
+                    df = df.drop(columns=final_column)
+                    columnas = list(df.columns.copy())
+                    if categoric_indices == list():
+                        categoric_indices = np.array(categoric_indices)
                     else:
-                        min_label_counts_0 = 0
-                    # Drop Nan by columns
-                    df_dropna_1 = df.dropna(axis=1)
-                    _, label_counts_1 = np.unique(df_dropna_1[final_column],
-                                                  return_counts=True)
-                    min_label_counts_1 = np.min(label_counts_1)
+                        categoric_indices = np.array(categoric_indices, dtype=int) - sus
 
-                    n_len_rm_rows = len(df_dropna_0.index)  # Length of instances when rows are removed
-                    m_len_rm_rows = len(df_dropna_0.columns)  # Length of features when columns are removed
-                    n_len_rm_cols = len(df_dropna_1.index)  # Length of instances when columns are removed
-                    m_len_rm_cols = len(df_dropna_1.columns)  # Length of features when columns are removed
-                    if min_label_counts_0 < 2:
-                        if min_label_counts_1 >= 2:
+                    # Replacing missing by NaN
+                    for c in columnas:
+                        if c not in categoric_indices and df[c].dtype == str:
+                            df[c] = df[c].replace(missing)
+
+                    # Restore label column. With this label, we assure dropna
+                    df[final_column] = label_column
+
+                    if pd.isnull(df).values.any() == True:  # Don't work properly with "is"
+                        # Removing depending on how many data are left out
+                        n_len = len(df.index)  # Length of instances
+                        m_len = len(df.columns)  # Length of features
+                        # Drop NaN by rows
+                        df_dropna_0 = df.dropna(axis=0)
+                        if len(df_dropna_0) > 0:
+                            _, label_counts_0 = np.unique(df_dropna_0[final_column],
+                                                          return_counts=True)
+                            min_label_counts_0 = np.min(label_counts_0)
+                        else:
+                            min_label_counts_0 = 0
+                        # Drop Nan by columns
+                        df_dropna_1 = df.dropna(axis=1)
+                        _, label_counts_1 = np.unique(df_dropna_1[final_column],
+                                                      return_counts=True)
+                        min_label_counts_1 = np.min(label_counts_1)
+
+                        n_len_rm_rows = len(df_dropna_0.index)  # Length of instances when rows are removed
+                        m_len_rm_rows = len(df_dropna_0.columns)  # Length of features when columns are removed
+                        n_len_rm_cols = len(df_dropna_1.index)  # Length of instances when columns are removed
+                        m_len_rm_cols = len(df_dropna_1.columns)  # Length of features when columns are removed
+                        if min_label_counts_0 < min_target:
+                            if min_label_counts_1 > 5:
+                                df = df_dropna_1
+                            else:
+                                raise ValueError(directory, ' omitted. Removing NaNs delete class information')
+                        elif min_label_counts_1 < 2:
+                            df = df_dropna_0
+                        elif (n_len_rm_cols > (2 * n_len_rm_rows) and (2 * m_len_rm_cols) > m_len) or n_len_rm_rows == 0:
                             df = df_dropna_1
                         else:
-                            raise ValueError('Removing NaNs gives more uncertainty')
-                    elif min_label_counts_1 < 2:
-                        df = df_dropna_0
-                    elif (n_len_rm_cols > (2 * n_len_rm_rows) and (2 * m_len_rm_cols) > m_len) or n_len_rm_rows == 0:
-                        df = df_dropna_1
-                    else:
-                        df = df_dropna_0
+                            df = df_dropna_0
 
-                    if len(np.unique(df[final_column])) == 1:
-                        # Dropping NaN leaves just one class
-                        continue
+                        if len(np.unique(df[final_column])) == 1:
+                            # Dropping NaN leaves just one class
+                            continue
 
                     # Store label column
                     label_column = df[final_column].copy()
                     df = df.drop(columns=final_column)
                     columnas = list(df.columns.copy())
-                    categoric_indices = config['info']['categoric_indices'].split(',')
 
                     for c in columnas:
                         series_values = df[c].values
-                        i = str(int(c) + 1)
-                        try:
-                            if i in categoric_indices:
-                                raise ValueError
-                            # In case it is not pointed in config.ini
-                            series = [float(series_values[i])
-                                      for i in range(len(df[c]))]
+                        if c not in categoric_indices:
+                            # series = [float(series_values[i])
+                            #           for i in range(len(df[c]))]
                             df[c] = pd.Series(df[c], dtype=np.float)
-                        except ValueError:  # It was a string, need to be transformed
+                        else:  # It was a string, need to be transformed
                             number_cat = len(np.unique(series_values))
                             df = df.drop(columns=c)
                             if number_cat == 1:  # It is unuseful
@@ -221,20 +266,24 @@ def process_data(config_folder,
                     # Saving the dataframe into processed folder
                     df.to_csv(os.path.join(processed_folder, data_file), sep=' ', header=False, index=False)
 
+                except ValueError as e:
+                    print(' '.join([data_file, 'gives a ValueError:', str(e)]))
+                    error_files.append(data_file)
+
                 except pd.errors.ParserError as e:
-                    print(' '.join([data_file, 'gives a parser error']))
+                    print(' '.join([data_file, 'gives a parser error:', str(e)]))
                     error_files.append(data_file)
 
                 except KeyError as e:
-                    print(' '.join([data_file, 'gives a KeyError']))
+                    print(' '.join([data_file, 'gives a KeyError:', str(e)]))
                     error_files.append(data_file)
 
                 except TypeError as e:
-                    print(' '.join([data_file, 'gives a TypeError']))
+                    print(' '.join([data_file, 'gives a TypeError:', str(e)]))
                     error_files.append(data_file)
 
                 except IndexError as e:
-                    print(' '.join([data_file, 'separator is not correct']))
+                    print(' '.join([data_file, 'separator is not correct:', str(e)]))
                     error_files.append(data_file)
 
             else:

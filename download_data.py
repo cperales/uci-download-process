@@ -24,18 +24,23 @@ def download_files(config_folder,
                     data_download = os.path.split(config['info']['data_url'])[-1]
                     data_name = config['info']['name']
                     f.write(''.join([data_url, '\n']))
-                    final_filename = os.path.join(complete_folder, data_download)
-                    # Download file
-                    bash_command = ['wget', '-nc', data_url, '-O', final_filename]
-                    subprocess.run(bash_command)
-                    # Extract data if necessary
-                    if '.tar.gz' in data_download:
-                        extract_tar(complete_folder=complete_folder,
-                                    tar_file=data_download,
-                                    data_name=data_name)
-                    elif data_name != data_download:
-                        os.rename(final_filename,
-                                  os.path.join(complete_folder, data_name))
+                    download_filename = os.path.join(complete_folder, data_download)
+                    final_filename = os.path.join(complete_folder, data_name)
+                    if not os.path.isfile(final_filename):
+                        # Download file
+                        bash_command = ['wget', '-nc', data_url, '-O', download_filename]
+                        subprocess.run(bash_command)
+                        # Extract data if necessary
+                        if '.tar.gz' in data_download:
+                            extract_tar(complete_folder=complete_folder,
+                                        tar_file=data_download,
+                                        data_name=data_name)
+                        elif data_name != data_download:
+                            os.rename(download_filename,
+                                      final_filename)
+                    else:
+                        # print('Dataset', data_name, 'already downloaded')
+                        pass
                     # Copy file to raw data folder
                     final_filename_2 = os.path.join(raw_data_folder, data_name)
                     shutil.copyfile(final_filename, final_filename_2)
@@ -51,7 +56,7 @@ def extract_tar(complete_folder, tar_file, data_name):
     """
     files_folder = os.listdir(complete_folder)
     tar_file_path = os.path.join(complete_folder, tar_file)
-    bash_command = ['tar', 'xzf', tar_file_path,'-C', complete_folder]
+    bash_command = ['tar', 'xzf', tar_file_path, '-C', complete_folder]
     subprocess.run(bash_command)
     new_files_folder = os.listdir(complete_folder)
     for f in new_files_folder:

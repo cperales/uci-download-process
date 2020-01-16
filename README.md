@@ -15,7 +15,7 @@ This makes it easy to switch out datasets in ML problems, which is great when au
 
 The datasets are not checked in to git in order to minimise the size of the repository and to avoid rehosting the data. As such, the script downloads any missing datasets directly from UCI as it runs.
 
-### Running the code
+## Running the code
 
 There are two ways of running the code. Easy/obscure way is to run
 first the `install_requirements.sh` script, using `bash`
@@ -24,7 +24,21 @@ first the `install_requirements.sh` script, using `bash`
 bash install_requirements.sh
 ```
 
-Which install the Python 3 requirements from `requirements.txt`.
+Which install the Python 3 requirements from `requirements.txt`. Packages necessaries for this library:
+
+- numpy
+- ordered-set
+- pandas
+- PyLaTeX
+- python-dateutil
+- pytz
+- scikit-learn
+- scipy
+- six
+- sklearn
+- wget
+
+
 After that, the main script
 
 ```bash
