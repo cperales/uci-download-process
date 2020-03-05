@@ -1,6 +1,7 @@
 import configparser
 import os
 import shutil
+import tarfile
 import subprocess
 
 
@@ -20,20 +21,23 @@ def download_files(config_folder,
                 config = configparser.ConfigParser()
                 config.read(config_file)
                 try:
-                    data_url = config['info']['data_url']
-                    data_download = os.path.split(config['info']['data_url'])[-1]
                     data_name = config['info']['name']
-                    f.write(''.join([data_url, '\n']))
-                    download_filename = os.path.join(complete_folder, data_download)
                     final_filename = os.path.join(complete_folder, data_name)
                     if not os.path.isfile(final_filename):
+                        # URL file
+                        data_url = config['info']['data_url']
+                        data_download = os.path.split(config['info']['data_url'])[-1]
+                        f.write(''.join([data_url, '\n']))
+                        download_filename = os.path.join(complete_folder, data_download)
                         # Download file
                         bash_command = ['wget', '-nc', data_url, '-O', download_filename]
                         subprocess.run(bash_command)
                         # Extract data if necessary
-                        if '.tar.gz' in data_download:
+                        if '.tar.gz' == data_download[-7:] or '.tgz' == data_download[-4:]:
+                            tar_name = config.get('info', 'tar_name', fallback=data_name)
                             extract_tar(complete_folder=complete_folder,
                                         tar_file=data_download,
+                                        tar_name=tar_name,
                                         data_name=data_name)
                         elif data_name != data_download:
                             os.rename(download_filename,
@@ -45,20 +49,32 @@ def download_files(config_folder,
                     final_filename_2 = os.path.join(raw_data_folder, data_name)
                     shutil.copyfile(final_filename, final_filename_2)
                 except Exception as e:
-                    print(e)
+                    print('Error in', folder, ':', e)
 
 
-def extract_tar(complete_folder, tar_file, data_name):
+def extract_tar(complete_folder, tar_file, tar_name, data_name):
     """
     Extract tar.gz file and get the data.
-    :param tar_file:
-    :return:
     """
-    files_folder = os.listdir(complete_folder)
     tar_file_path = os.path.join(complete_folder, tar_file)
+    tf = tarfile.open(tar_file_path)
+    tar_inside = tf.getnames()
+    for t_i in tar_inside:
+        if tar_name in t_i:
+            tf.extract(t_i, path=complete_folder)
+            shutil.move(os.path.join(complete_folder, t_i), os.path.join(complete_folder, data_name))
+            break
+    try:
+        shutil.rmtree(os.path.join(complete_folder, t_i.split('/')[0]))
+    except:
+        pass
+
+
+def old_extract_tar(complete_folder, tar_file, data_name):
     bash_command = ['tar', 'xzf', tar_file_path, '-C', complete_folder]
     subprocess.run(bash_command)
     new_files_folder = os.listdir(complete_folder)
+    # The new file is the folder
     for f in new_files_folder:
         if f not in files_folder:  # Extracted file or folder
             if data_name == f:  # It is the file we were expecting
@@ -109,8 +125,9 @@ def remove_folder(folder):
 
 
 if __name__ == '__main__':
-    # config_folders = ['datafiles/classification/', 'datafiles/regression/']
-    config_folders = ['datafiles/classification/']
+    config_folders = ['datafiles/regression/']
+    # config_folders = ['datafiles/classification/']
+    # config_folders = ['testing/classification']
     log_file = 'logs/db.txt'
     raw_data_folder = 'raw_data'
 

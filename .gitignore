@@ -6,6 +6,8 @@ data/
 *.tex
 *.names
 *.test
+*.tgz
+*.tar.gz
 
 # Logs
 logs/

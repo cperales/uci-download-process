@@ -65,6 +65,7 @@ def k_folding(data_folder, log_file, file=None, classification=True):
         for dir_file_pair in dir_file_pairs:
             try:
                 dir_name, file_name = dir_file_pair
+                print('K folding', dir_name, '...')
                 # print('Folding {}'.format(file_name))
                 df_file = pd.read_csv(os.path.join(dir_name, file_name),
                                       sep='\s+',
@@ -120,8 +121,8 @@ def k_folding(data_folder, log_file, file=None, classification=True):
 
 if __name__ == '__main__':
     data_folder = 'data/'
-    # processed_folders = ['processed_data/regression', 'processed_data/classification']
-    processed_folders = ['processed_data/classification']
+    processed_folders = ['processed_data/regression']
+    # processed_folders = ['processed_data/classification']
     log_file = 'logs/kfold_error.txt'
 
     if os.path.isdir(data_folder):

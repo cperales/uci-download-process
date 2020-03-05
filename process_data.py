@@ -52,7 +52,6 @@ def process_data(config_folder,
 
     # Scroll through folders
     for directory in folders:
-        # for directory in ['flags']:
         # print('Now', directory)
         config_file = None
         data_file = None
@@ -66,6 +65,7 @@ def process_data(config_folder,
                 else:
                     pass
             if config_file is not None and data_file is not None:
+                print(directory)
                 try:
                     # Read config file
                     config = configparser.ConfigParser()
@@ -188,7 +188,7 @@ def process_data(config_folder,
 
                     # Replacing missing by NaN
                     for c in columnas:
-                        if c not in categoric_indices and df[c].dtype == str:
+                        if c not in categoric_indices and (df[c].dtype != int and df[c].dtype != float):
                             df[c] = df[c].replace(missing)
 
                     # Restore label column. With this label, we assure dropna
@@ -345,8 +345,8 @@ def log_download_error(log_download, download_error):
 if __name__ == '__main__':
     log_process = 'logs/convert_error.txt'
     log_download = 'logs/download_error.txt'
-    # config_folders = ['datafiles/regression', 'datafiles/classification']
-    config_folders = ['datafiles/classification']
+    config_folders = ['datafiles/regression']
+    # config_folders = ['datafiles/classification']
     processed_data_folder = 'processed_data/'
 
     # Remove and create folder, for a fresh raw data

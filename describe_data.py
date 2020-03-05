@@ -111,8 +111,8 @@ def description(full_data_files, description_folder):
 
 if __name__ == '__main__':
 
-    description_folder = 'description'
-    data_folder = 'data/classification'
+    description_folder = 'description/regression'
+    data_folder = 'data/regression'
 
     if not os.path.isdir(description_folder):
         os.mkdir(description_folder)
