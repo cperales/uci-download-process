@@ -128,14 +128,13 @@ if __name__ == '__main__':
     config_folders = ['datafiles/regression/', 'datafiles/classification/']
     log_file = 'logs/db.txt'
     raw_data_folder = 'raw_data'
-
-    # Remove and create folder, for a fresh raw data
-    remove_folder(raw_data_folder)
     check_folder(raw_data_folder)
 
     for config_folder in config_folders:
         data_type = config_folder.split('/')[1]
         raw_folder = os.path.join(raw_data_folder, data_type)
+        # Remove and create folder
+        remove_folder(raw_folder)
         check_folder(raw_folder)
 
         # remove_files(config_folder)

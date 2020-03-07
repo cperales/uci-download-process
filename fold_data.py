@@ -6,7 +6,7 @@ import warnings
 import math
 import os
 from sklearn.model_selection import StratifiedKFold, KFold
-from download_data import check_folder
+from download_data import check_folder, remove_folder
 
 
 # Ignore warnings
@@ -120,13 +120,10 @@ def k_folding(data_folder, log_file, file=None, classification=True):
 
 
 if __name__ == '__main__':
-    data_folder = 'data/'
     processed_folders = ['processed_data/regression', 'processed_data/classification']
     log_file = 'logs/kfold_error.txt'
-
-    if os.path.isdir(data_folder):
-        shutil.rmtree(data_folder)
-    os.mkdir(data_folder)
+    data_folder = 'data/'
+    check_folder(data_folder)
 
     for processed_folder in processed_folders:
         # Data  type folder
@@ -136,7 +133,10 @@ if __name__ == '__main__':
         else:
             classification = False
         data_type_folder = os.path.join(data_folder, data_type)
+        # Remove and create folder
+        remove_folder(data_type_folder)
         check_folder(data_type_folder)
+
         creating_nested_folders(processed_folder,
                                 data_type_folder)
         k_folding(data_type_folder, log_file, classification=classification)

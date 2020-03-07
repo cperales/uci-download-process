@@ -52,13 +52,15 @@ def process_data(config_folder,
 
     # Classification or regression
     if 'classification' in config_folder:
+        print('Processing classification')
         classification = True
     else:
+        print('Processing regression')
         classification = False
 
     # Scroll through folders
     for directory in folders:
-        # print('Now', directory)
+        print('Formatting', directory)
         config_file = None
         data_file = None
         full_dir = os.path.join(config_folder, directory)
@@ -146,21 +148,38 @@ def process_data(config_folder,
                                          encoding='utf-16le')
                     if header is not None:
                         df = df.iloc[header + 1:]
-                    # Changing label to last column
-                    final_column = df.columns[-1]
-                    sus = 0
-                    if label_column != final_column:
-                        if label_column not in df.columns:
-                            raise KeyError('Label index {} is not in columns {}'.format(label_column, df.columns))
-                        a = df[final_column].copy()
-                        df[final_column] = df[label_column].copy()
-                        df[label_column] = a
-                        label_column = final_column
-
-                    # Rename columns
-                    range_columns = np.arange(len(df.columns))
+                    if index_col is not None:
+                        # Categoric columns after index reduce the numbers
+                        new_categoric_indices = list()
+                        for categoric_index in categoric_indices:
+                            for main_index in index_col:
+                                if categoric_index > main_index:
+                                    categoric_index -= 1
+                                new_categoric_indices.append(categoric_index)
+                        categoric_indices = new_categoric_indices
+                        # Value columns after index reduce the numbers
+                        new_value_indices = list()
+                        for value_index in value_indices:
+                            for main_index in index_col:
+                                if value_index > main_index:
+                                    value_index -= 1
+                                new_value_indices.append(value_index)
+                        value_indices = new_value_indices
+                        for main_index in index_col:
+                            if label_column > main_index:
+                                label_column -= 1
+                    # Renaming columns
+                    range_columns = list(set(categoric_indices + value_indices + [label_column]))
                     df.columns = range_columns
-                    label_column = final_column = df.columns[-1]
+                    # # Changing label to last column
+                    # final_column = df.columns[-1]
+                    # if label_column != final_column:
+                    #     if label_column not in df.columns:
+                    #         raise KeyError('Label index {} is not in columns {}'.format(label_column, df.columns))
+                    #     a = df[final_column].copy()
+                    #     df[final_column] = df[label_column].copy()
+                    #     df[label_column] = a
+                    #     label_column = final_column
 
                     # Now, final column is the column for the label
                     if classification is True:
@@ -168,28 +187,28 @@ def process_data(config_folder,
                         if np.min(unique_count) < min_target:
                             raise ValueError('Original data doesn\'t has poor class distribution,', np.min(unique_count))
 
-                    if df[final_column].dtype != int and df[final_column].dtype != float:
+                    if df[label_column].dtype != int and df[label_column].dtype != float:
                         if 'regression' in config_folder:
-                            df[final_column] = pd.Series(df[final_column],
+                            df[label_column] = pd.Series(df[label_column],
                                                          dtype=np.float)
                         else:
                             le = LabelEncoder()
                             try:
-                                df[final_column] = le.fit_transform([str(e).replace(' ', '')
-                                                                     for e in df[final_column]])
+                                df[label_column] = le.fit_transform([str(e).replace(' ', '')
+                                                                     for e in df[label_column]])
                             except TypeError as e:
-                                df[final_column] = df[final_column].factorize()[0]
-                            df[final_column] = pd.Series(df[final_column] +
-                                                         (1 - np.min(df[final_column].values)),
+                                df[label_column] = df[label_column].factorize()[0]
+                            df[label_column] = pd.Series(df[label_column] +
+                                                         (1 - np.min(df[label_column].values)),
                                                      dtype=np.int)
                     # Store label column
-                    label_column = df[final_column].copy()
-                    df = df.drop(columns=final_column)
+                    label_series = df[label_column].copy()
+                    df = df.drop(columns=label_column)
                     columnas = list(df.columns.copy())
                     if categoric_indices == list():
                         categoric_indices = np.array(categoric_indices)
                     else:
-                        categoric_indices = np.array(categoric_indices, dtype=int) - sus
+                        categoric_indices = np.array(categoric_indices, dtype=int)
 
                     # Replacing missing by NaN
                     for c in columnas:
@@ -197,7 +216,7 @@ def process_data(config_folder,
                             df[c] = df[c].replace(missing)
 
                     # Restore label column. With this label, we assure dropna
-                    df[final_column] = label_column
+                    df[label_column] = label_series
 
                     if pd.isnull(df).values.any() == True:  # Don't work properly with "is"
                         # Removing depending on how many data are left out
@@ -209,13 +228,13 @@ def process_data(config_folder,
                         df_dropna_1 = df.dropna(axis=1)
                         if classification is True:
                             if len(df_dropna_0) > 0:
-                                _, label_counts_0 = np.unique(df_dropna_0[final_column],
+                                _, label_counts_0 = np.unique(df_dropna_0[label_column],
                                                               return_counts=True)
                                 if classification is True:
                                     min_label_counts_0 = np.min(label_counts_0)
                             else:
                                 min_label_counts_0 = 0
-                            _, label_counts_1 = np.unique(df_dropna_1[final_column],
+                            _, label_counts_1 = np.unique(df_dropna_1[label_column],
                                                           return_counts=True)
                             min_label_counts_1 = np.min(label_counts_1)
                             if min_label_counts_0 < min_target:
@@ -235,16 +254,12 @@ def process_data(config_folder,
                         else:
                             df = df_dropna_0
 
-                        if len(np.unique(df[final_column])) == 1:
-                            # Dropping NaN leaves just one class
-                            continue
-
                     # Store label column
-                    label_column = df[final_column].copy()
-                    df = df.drop(columns=final_column)
-                    columnas = list(df.columns.copy())
+                    label_series = df[label_column].copy()
+                    df = df.drop(columns=label_column)
+                    columns = list(df.columns.copy())
 
-                    for c in columnas:
+                    for c in columns:
                         series_values = df[c].values
                         if c not in categoric_indices:
                             # series = [float(series_values[i])
@@ -268,7 +283,7 @@ def process_data(config_folder,
                                     df[c_label] = series_binarized_t[i - 1]
 
                     # Restore label column. With this label, we assure this is at the end
-                    df['Target'] = label_column
+                    df['Target'] = label_series
 
                     # Saving the dataframe into processed folder
                     df.to_csv(os.path.join(processed_folder, data_file), sep=' ', header=False, index=False)
@@ -354,14 +369,13 @@ if __name__ == '__main__':
     log_download = 'logs/download_error.txt'
     config_folders = ['datafiles/regression', 'datafiles/classification']
     processed_data_folder = 'processed_data/'
-
-    # Remove and create folder, for a fresh raw data
-    remove_folder(processed_data_folder)
     check_folder(processed_data_folder)
 
     for config_folder in config_folders:
         data_type = config_folder.split('/')[1]
         processed_folder = os.path.join(processed_data_folder, data_type)
+        # Remove and create folder
+        remove_folder(processed_folder)
         check_folder(processed_folder)
 
         process_data(config_folder=config_folder,

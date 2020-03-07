@@ -4,12 +4,10 @@ import pandas as pd
 import numpy as np
 from pylatex import Document, LongTable
 from copy import deepcopy
-from download_data import check_folder
+from download_data import check_folder, remove_folder
 
 
 def description_classification(full_data_files, description_folder):
-    description_folder = os.path.join(description_folder, 'classification')
-    check_folder(description_folder)
     data_list = list()
     for d in full_data_files:
         name = d.split('/')[2].split('.')[0]
@@ -113,8 +111,6 @@ def description_classification(full_data_files, description_folder):
 
 
 def description_regression(full_data_files, description_folder):
-    description_folder = os.path.join(description_folder, 'regression')
-    check_folder(description_folder)
     data_list = list()
     for d in full_data_files:
         name = d.split('/')[2].split('.')[0]
@@ -179,8 +175,17 @@ if __name__ == '__main__':
     for data_folder in data_folders:
         full_data_files = glob.glob(data_folder + '/*/*.data')
         if len(full_data_files) >= 1:
-            # data_files = [d.split('/')[2].split('.')[0] for d in full_data_files]
             if 'classification' in data_folder:
-                description_classification(full_data_files, description_folder)
+                description_folder_type = os.path.join(description_folder,
+                                                       'classification')
+                # Remove and create folder
+                remove_folder(description_folder_type)
+                check_folder(description_folder_type)
+                description_classification(full_data_files, description_folder_type)
             else:
-                description_regression(full_data_files, description_folder)
+                description_folder_type = os.path.join(description_folder,
+                                                       'regression')
+                # Remove and create folder
+                remove_folder(description_folder_type)
+                check_folder(description_folder_type)
+                description_regression(full_data_files, description_folder_type)
