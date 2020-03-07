@@ -4,9 +4,12 @@ import pandas as pd
 import numpy as np
 from pylatex import Document, LongTable
 from copy import deepcopy
+from download_data import check_folder
 
 
-def description(full_data_files, description_folder):
+def description_classification(full_data_files, description_folder):
+    description_folder = os.path.join(description_folder, 'classification')
+    check_folder(description_folder)
     data_list = list()
     for d in full_data_files:
         name = d.split('/')[2].split('.')[0]
@@ -109,15 +112,75 @@ def description(full_data_files, description_folder):
                                   'data_description'), clean_tex=False)
 
 
+def description_regression(full_data_files, description_folder):
+    description_folder = os.path.join(description_folder, 'regression')
+    check_folder(description_folder)
+    data_list = list()
+    for d in full_data_files:
+        name = d.split('/')[2].split('.')[0]
+        df = pd.read_csv(d,
+                         sep='\s+',
+                         header=None)
+        lines, columns = df.shape
+        attribute = columns - 1  # Minus one because of target
+        data_list.append({'Dataset': name,
+                          'Size': lines,
+                          'Attributes': attribute})
+
+    df = pd.DataFrame(data_list)
+    df = df.sort_values('Size', ascending=False)
+    cols = ['Dataset',
+            'Size',
+            'Attributes']
+    df = df[cols]
+    df_copy = deepcopy(df)
+    df_copy.to_csv(os.path.join(description_folder,
+                                'data_description.csv'),
+                   sep=',',
+                   header=True,
+                   columns=['Dataset',
+                            'Size',
+                            'Attributes'],
+                   index=False)
+
+    # # LaTeX
+    df = df.set_index(['Dataset'])
+
+    # Max classes per row
+    max_classes = np.inf
+    geometry_options = {
+        "margin": "1.00cm",
+        "includeheadfoot": True
+    }
+    doc = Document(page_numbers=True, geometry_options=geometry_options)
+
+    # Generate data table
+    with doc.create(LongTable("l l l")) as data_table:
+            data_table.add_hline()
+            header = ["Dataset",
+                      "Size",
+                      "#Attr."]
+            data_table.add_row(header)
+            data_table.add_hline()
+            data_table.add_hline()
+            for index in df.index.values:
+                row = [index] + df.loc[index].values.tolist()
+                data_table.add_row(row)
+
+    doc.generate_pdf(os.path.join(description_folder,
+                                  'data_description'), clean_tex=False)
+
+
 if __name__ == '__main__':
+    description_folder = 'description'
+    check_folder(description_folder)
 
-    description_folder = 'description/regression'
-    data_folder = 'data/regression'
-
-    if not os.path.isdir(description_folder):
-        os.mkdir(description_folder)
-
-    full_data_files = glob.glob(data_folder + '/*/*.data')
-    # data_files = [d.split('/')[2].split('.')[0] for d in full_data_files]
-
-    description(full_data_files, description_folder)
+    data_folders = ['data/classification', 'data/regression']
+    for data_folder in data_folders:
+        full_data_files = glob.glob(data_folder + '/*/*.data')
+        if len(full_data_files) >= 1:
+            # data_files = [d.split('/')[2].split('.')[0] for d in full_data_files]
+            if 'classification' in data_folder:
+                description_classification(full_data_files, description_folder)
+            else:
+                description_regression(full_data_files, description_folder)

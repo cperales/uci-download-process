@@ -50,6 +50,12 @@ def process_data(config_folder,
     # Folders from configuration
     folders = os.listdir(config_folder)
 
+    # Classification or regression
+    if 'classification' in config_folder:
+        classification = True
+    else:
+        classification = False
+
     # Scroll through folders
     for directory in folders:
         # print('Now', directory)
@@ -65,7 +71,6 @@ def process_data(config_folder,
                 else:
                     pass
             if config_file is not None and data_file is not None:
-                print(directory)
                 try:
                     # Read config file
                     config = configparser.ConfigParser()
@@ -158,24 +163,24 @@ def process_data(config_folder,
                     label_column = final_column = df.columns[-1]
 
                     # Now, final column is the column for the label
-                    unique_target, unique_count = np.unique(df[label_column], return_counts=True)
-                    if np.min(unique_count) < min_target:
-                        raise ValueError('Original data doesn\'t has poor class distribution,', np.min(unique_count))
+                    if classification is True:
+                        unique_target, unique_count = np.unique(df[label_column], return_counts=True)
+                        if np.min(unique_count) < min_target:
+                            raise ValueError('Original data doesn\'t has poor class distribution,', np.min(unique_count))
 
                     if df[final_column].dtype != int and df[final_column].dtype != float:
-                        le = LabelEncoder()
-                        try:
-                            df[final_column] = le.fit_transform([str(e).replace(' ', '')
-                                                                 for e in df[final_column]])
-                        except TypeError as e:
-                            df[final_column] = df[final_column].factorize()[0]
-
-                    if 'regression' in config_folder:
-                        df[final_column] = pd.Series(df[final_column],
-                                                     dtype=np.float)
-                    else:
-                        df[final_column] = pd.Series(df[final_column] +
-                                                     (1 - np.min(df[final_column].values)),
+                        if 'regression' in config_folder:
+                            df[final_column] = pd.Series(df[final_column],
+                                                         dtype=np.float)
+                        else:
+                            le = LabelEncoder()
+                            try:
+                                df[final_column] = le.fit_transform([str(e).replace(' ', '')
+                                                                     for e in df[final_column]])
+                            except TypeError as e:
+                                df[final_column] = df[final_column].factorize()[0]
+                            df[final_column] = pd.Series(df[final_column] +
+                                                         (1 - np.min(df[final_column].values)),
                                                      dtype=np.int)
                     # Store label column
                     label_column = df[final_column].copy()
@@ -200,30 +205,32 @@ def process_data(config_folder,
                         m_len = len(df.columns)  # Length of features
                         # Drop NaN by rows
                         df_dropna_0 = df.dropna(axis=0)
-                        if len(df_dropna_0) > 0:
-                            _, label_counts_0 = np.unique(df_dropna_0[final_column],
-                                                          return_counts=True)
-                            min_label_counts_0 = np.min(label_counts_0)
-                        else:
-                            min_label_counts_0 = 0
                         # Drop Nan by columns
                         df_dropna_1 = df.dropna(axis=1)
-                        _, label_counts_1 = np.unique(df_dropna_1[final_column],
-                                                      return_counts=True)
-                        min_label_counts_1 = np.min(label_counts_1)
+                        if classification is True:
+                            if len(df_dropna_0) > 0:
+                                _, label_counts_0 = np.unique(df_dropna_0[final_column],
+                                                              return_counts=True)
+                                if classification is True:
+                                    min_label_counts_0 = np.min(label_counts_0)
+                            else:
+                                min_label_counts_0 = 0
+                            _, label_counts_1 = np.unique(df_dropna_1[final_column],
+                                                          return_counts=True)
+                            min_label_counts_1 = np.min(label_counts_1)
+                            if min_label_counts_0 < min_target:
+                                if min_label_counts_1 > 5:
+                                    df = df_dropna_1
+                                else:
+                                    raise ValueError(directory, ' omitted. Removing NaNs delete class information')
+                            elif min_label_counts_1 < 2:
+                                df = df_dropna_0
 
                         n_len_rm_rows = len(df_dropna_0.index)  # Length of instances when rows are removed
                         m_len_rm_rows = len(df_dropna_0.columns)  # Length of features when columns are removed
                         n_len_rm_cols = len(df_dropna_1.index)  # Length of instances when columns are removed
                         m_len_rm_cols = len(df_dropna_1.columns)  # Length of features when columns are removed
-                        if min_label_counts_0 < min_target:
-                            if min_label_counts_1 > 5:
-                                df = df_dropna_1
-                            else:
-                                raise ValueError(directory, ' omitted. Removing NaNs delete class information')
-                        elif min_label_counts_1 < 2:
-                            df = df_dropna_0
-                        elif (n_len_rm_cols > (2 * n_len_rm_rows) and (2 * m_len_rm_cols) > m_len) or n_len_rm_rows == 0:
+                        if (n_len_rm_cols > (2 * n_len_rm_rows) and (2 * m_len_rm_cols) > m_len) or n_len_rm_rows == 0:
                             df = df_dropna_1
                         else:
                             df = df_dropna_0
@@ -345,8 +352,7 @@ def log_download_error(log_download, download_error):
 if __name__ == '__main__':
     log_process = 'logs/convert_error.txt'
     log_download = 'logs/download_error.txt'
-    config_folders = ['datafiles/regression']
-    # config_folders = ['datafiles/classification']
+    config_folders = ['datafiles/regression', 'datafiles/classification']
     processed_data_folder = 'processed_data/'
 
     # Remove and create folder, for a fresh raw data

@@ -126,8 +126,6 @@ def remove_folder(folder):
 
 if __name__ == '__main__':
     config_folders = ['datafiles/regression/', 'datafiles/classification/']
-    # config_folders = ['datafiles/regression/']
-    # config_folders = ['testing/classification']
     log_file = 'logs/db.txt'
     raw_data_folder = 'raw_data'
 

@@ -73,19 +73,19 @@ def k_folding(data_folder, log_file, file=None, classification=True):
                 target_position = df_file.columns[-1]
                 x = df_file[[i for i in range(target_position)]]
                 y = df_file[[target_position]]
-                # Testing if there is enough instances for n fold
-                count = [np.count_nonzero(y == label) for label in np.unique(y)]
-                if np.min(count) < 2:
-                    raise ValueError('Not enough elements of one label')
-                rep = np.max(count)  # If maximum is not enough to n fold
-                if n_fold > rep:
-                    times = math.ceil(n_fold / rep)
-                    x = pd.concat(times * [x])
-                    y = pd.concat(times * [y])
                 # Shuffle false in order to preserve
                 i = 0
                 file = file_name.replace('.data', '')
                 if classification is True:
+                    # Testing if there is enough instances for n fold
+                    count = [np.count_nonzero(y == label) for label in np.unique(y)]
+                    if np.min(count) < 2:
+                        raise ValueError('Not enough elements of one label')
+                    rep = np.max(count)  # If maximum is not enough to n fold
+                    if n_fold > rep:
+                        times = math.ceil(n_fold / rep)
+                        x = pd.concat(times * [x])
+                        y = pd.concat(times * [y])
                     kf = StratifiedKFold(n_splits=n_fold, shuffle=False)
                 else:
                     kf = KFold(n_splits=n_fold, shuffle=True)
@@ -121,8 +121,7 @@ def k_folding(data_folder, log_file, file=None, classification=True):
 
 if __name__ == '__main__':
     data_folder = 'data/'
-    processed_folders = ['processed_data/regression']
-    # processed_folders = ['processed_data/classification']
+    processed_folders = ['processed_data/regression', 'processed_data/classification']
     log_file = 'logs/kfold_error.txt'
 
     if os.path.isdir(data_folder):

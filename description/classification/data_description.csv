@@ -6,7 +6,6 @@ poker-hand,25010,10,10,12493;10599;1206;513;93;54;36;6;5;5
 letter-recognition,20000,16,26,813;805;803;796;792;789;787;786;783;783;775;773;768;766;764;761;758;755;753;752;748;747;739;736;734;734
 polish-bankruptcy,19967,64,2,19535;432
 magic-gamma-telescope,19020,10,2,12332;6688
-crowdsourced-mapping,10845,28,6,7509;1494;1009;482;251;100
 electrical-grid,10000,12,2,6380;3620
 mushroom,8124,105,2,4208;3916
 pen-based-recognition-handwritten-digits,7494,16,10,780;780;780;779;778;720;720;719;719;719
@@ -62,7 +61,6 @@ glass-identification,214,9,6,76;70;29;17;13;9
 image-segmentation,210,19,7,30;30;30;30;30;30;30
 seeds,210,7,3,70;70;70
 connectionist-bench-sonar,208,60,2,111;97
-heart-disease-va,200,17,5,56;51;42;41;10
 parkinsons,195,21,2,147;48
 breast-cancer-wisconsin-prognostic,194,32,2,148;46
 planning-relax,182,12,2,130;52
