@@ -2,6 +2,7 @@ Dataset,Size,Attributes
 friedman,40768,9
 electrical-grid,10000,12
 elevators,8752,17
+kin8nm,8192,8
 ailerons,7154,40
 parkinsons-motor,5875,16
 parkinsons-total,5875,16
