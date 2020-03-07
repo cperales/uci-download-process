@@ -8,6 +8,10 @@ data/
 *.test
 *.tgz
 *.tar.gz
+*.zip
+
+# Folders
+testing/
 
 # Logs
 logs/
