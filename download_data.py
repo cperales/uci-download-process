@@ -4,6 +4,7 @@ import shutil
 import tarfile
 import subprocess
 from zipfile import ZipFile
+from rarfile import RarFile
 
 
 def download_files(config_folder,
@@ -45,6 +46,12 @@ def download_files(config_folder,
                             extract_zip(complete_folder=complete_folder,
                                         zip_file=data_download,
                                         zip_name=zip_name,
+                                        data_name=data_name)
+                        elif '.rar' == data_download[-4:]:
+                            rar_name = config.get('info', 'rar_name', fallback=data_name)
+                            extract_rar(complete_folder=complete_folder,
+                                        rar_file=data_download,
+                                        rar_name=rar_name,
                                         data_name=data_name)
                         elif data_name != data_download:
                             os.rename(download_filename,
@@ -95,25 +102,22 @@ def extract_zip(complete_folder, zip_file, zip_name, data_name):
         pass
 
 
-def old_extract_tar(complete_folder, tar_file, data_name):
-    bash_command = ['tar', 'xzf', tar_file_path, '-C', complete_folder]
-    subprocess.run(bash_command)
-    new_files_folder = os.listdir(complete_folder)
-    # The new file is the folder
-    for f in new_files_folder:
-        if f not in files_folder:  # Extracted file or folder
-            if data_name == f:  # It is the file we were expecting
-                break
-            elif os.path.isdir(f):  # It is a folder
-                subfolder_path = os.path.join(complete_folder, f)
-                files_in_folder = os.listdir(subfolder_path)
-                for f_s in files_in_folder:
-                    if data_name == f_s:
-                        shutil.move(os.path.join(subfolder_path, data_name),
-                                    os.path.join(complete_folder, data_name))
-                        shutil.rmtree(subfolder_path)
-                        os.remove(tar_file_path)
-                        break
+def extract_rar(complete_folder, rar_file, rar_name, data_name):
+    """
+    Extract rar.gz file and get the data.
+    """
+    rar_file_path = os.path.join(complete_folder, rar_file)
+    rf = RarFile(rar_file_path)
+    rar_inside = rf.namelist()
+    for t_i in rar_inside:
+        if rar_name in t_i:
+            rf.extract(t_i, path=complete_folder)
+            shutil.move(os.path.join(complete_folder, t_i), os.path.join(complete_folder, data_name))
+            break
+    try:
+        shutil.rmtree(os.path.join(complete_folder, t_i.split('/')[0]))
+    except:
+        pass
 
 
 def remove_files(config_folder):
