@@ -1,6 +1,7 @@
 Dataset,Size,Attributes
 casp,45730,9
 friedman,40768,9
+news-popularity,39644,58
 electrical-grid,10000,12
 elevators,8752,17
 kin8nm,8192,8
@@ -38,8 +39,8 @@ wimbledon-men-2013b,113,163
 frenchopen-women-2013b,111,155
 frenchopen-women-2013a,111,155
 ausopen-men-2013a,103,138
-slump-mpa,103,7
 slump,103,7
+slump-mpa,103,7
 ausopen-men-2013b,103,138
 slump-flow,103,7
 ausopen-women-2013a,99,141
