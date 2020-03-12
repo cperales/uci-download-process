@@ -120,7 +120,7 @@ def k_folding(data_folder, log_file, file=None, classification=True):
 
 
 if __name__ == '__main__':
-    processed_folders = ['processed_data/regression', 'processed_data/classification']
+    processed_folders = ['processed_data/regression']
     log_file = 'logs/kfold_error.txt'
     data_folder = 'data/'
     check_folder(data_folder)

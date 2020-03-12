@@ -367,7 +367,7 @@ def log_download_error(log_download, download_error):
 if __name__ == '__main__':
     log_process = 'logs/convert_error.txt'
     log_download = 'logs/download_error.txt'
-    config_folders = ['datafiles/regression', 'datafiles/classification']
+    config_folders = ['datafiles/regression']
     processed_data_folder = 'processed_data/'
     check_folder(processed_data_folder)
 

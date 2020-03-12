@@ -3,6 +3,7 @@ import os
 import shutil
 import tarfile
 import subprocess
+from zipfile import ZipFile
 
 
 def download_files(config_folder,
@@ -39,6 +40,12 @@ def download_files(config_folder,
                                         tar_file=data_download,
                                         tar_name=tar_name,
                                         data_name=data_name)
+                        elif '.zip' == data_download[-4:]:
+                            zip_name = config.get('info', 'zip_name', fallback=data_name)
+                            extract_zip(complete_folder=complete_folder,
+                                        zip_file=data_download,
+                                        zip_name=zip_name,
+                                        data_name=data_name)
                         elif data_name != data_download:
                             os.rename(download_filename,
                                       final_filename)
@@ -61,6 +68,24 @@ def extract_tar(complete_folder, tar_file, tar_name, data_name):
     tar_inside = tf.getnames()
     for t_i in tar_inside:
         if tar_name in t_i:
+            tf.extract(t_i, path=complete_folder)
+            shutil.move(os.path.join(complete_folder, t_i), os.path.join(complete_folder, data_name))
+            break
+    try:
+        shutil.rmtree(os.path.join(complete_folder, t_i.split('/')[0]))
+    except:
+        pass
+
+
+def extract_zip(complete_folder, zip_file, zip_name, data_name):
+    """
+    Extract zip.gz file and get the data.
+    """
+    zip_file_path = os.path.join(complete_folder, zip_file)
+    tf = ZipFile(zip_file_path)
+    zip_inside = tf.namelist()
+    for t_i in zip_inside:
+        if zip_name in t_i:
             tf.extract(t_i, path=complete_folder)
             shutil.move(os.path.join(complete_folder, t_i), os.path.join(complete_folder, data_name))
             break
@@ -125,7 +150,7 @@ def remove_folder(folder):
 
 
 if __name__ == '__main__':
-    config_folders = ['datafiles/regression/', 'datafiles/classification/']
+    config_folders = ['datafiles/regression/']
     log_file = 'logs/db.txt'
     raw_data_folder = 'raw_data'
     check_folder(raw_data_folder)
