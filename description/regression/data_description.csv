@@ -14,8 +14,10 @@ skillcraft,3338,18
 winequality-red,1599,11
 airfoil-self-noise,1503,5
 parkinsons-speech,1040,26
+student-performance-por,649,43
 forestfires,517,28
 housing,506,13
+student-performance-mat,395,43
 auto-mpg,392,7
 yatch,308,6
 cpu-performance,209,245
@@ -36,12 +38,12 @@ wimbledon-men-2013b,113,163
 frenchopen-women-2013b,111,155
 frenchopen-women-2013a,111,155
 ausopen-men-2013a,103,138
-ausopen-men-2013b,103,138
-slump,103,7
 slump-mpa,103,7
+slump,103,7
+ausopen-men-2013b,103,138
 slump-flow,103,7
-ausopen-women-2013b,99,141
 ausopen-women-2013a,99,141
+ausopen-women-2013b,99,141
 pyrim,74,27
 usopen-women-2013a,74,106
 brazilian-logistic,60,20
