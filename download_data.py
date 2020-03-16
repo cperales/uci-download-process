@@ -14,6 +14,8 @@ def read_config(config_file='config.ini'):
     :param str config_file: Path to the configuration file.
     :return:
     """
+    if os.path.isfile(config_file) is False:
+        raise NameError(config_file, 'not found')
     config = configparser.ConfigParser()
     config.read(config_file)
     return config
@@ -162,7 +164,11 @@ def remove_folder(folder):
 
 
 if __name__ == '__main__':
-    parameter_config = read_config('config.ini')
+    try:
+        parameter_config = read_config('parameter_config.ini')
+    except NameError:
+        print('Not custom parameter config file found, using default')
+        parameter_config = read_config('default_config.ini')
     config_folders = parameter_config.get('DOWNLOAD',
                                           'config_folders').split(',')
 

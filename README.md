@@ -1,15 +1,16 @@
-# UCI Machine Learning Repository downloading and conversion scripts
+# UCI download/process software repository
+#### Open source Python repository for downloading, processing, folding and describing supervised machine learning datasets from UCI and others raw repositories
 
-[![DOI](https://zenodo.org/badge/132050484.svg)](https://zenodo.org/badge/latestdoi/132050484)
 
-This is a script for converting [UCI Machine Learning Repository](http://archive.ics.uci.edu/ml/datasets.html) datasets (and some from other sources) into a common format. This Python repository is a kind of fork of Julia repository [JackDunnNZ/uci-data](https://github.com/JackDunnNZ/uci-data), from which configuration files are extracted. The UCI ML repository is a useful source for machine learning datasets for testing and benchmarking, but the format of datasets is not consistent. This means effort is required in order to make use of new datasets since they need to be read differently.
+This Github repository is a set of scripts for downloading supervised machine learning
+ datasets from [UCI Machine Learning Repository](http://archive.ics.uci.edu/ml/datasets.html), and process them into a common format. Originally, it was a fork of Julia repository [JackDunnNZ/uci-data](https://github.com/JackDunnNZ/uci-data), from which configuration files were extracted. The UCI ML repository is a useful source for machine learning datasets for testing and benchmarking, but the format of datasets is not consistent. This means effort is required in order to make use of new datasets since they need to be read differently.
 
-Instead, the aim is to convert the datasets into a format to be read
-from [PyRidge](https://github.com/cperales/PyRidge), where each line is as follows:
+The main goal of this repository is to process the datasets into a format to be read
+from [PyRidge](https://github.com/cperales/PyRidge), where each row of final data is as follows:
 
     attribute_1 attribute_2 ... attribute_n class
 
-This makes it easy to switch out datasets in ML problems, which is great when automating things!
+This makes it easy to switch out datasets in ML problems, which is great when automating things.
 
 ## Converting to common format
 
@@ -27,16 +28,10 @@ bash install_requirements.sh
 Which install the Python 3 requirements from `requirements.txt`. Packages necessaries for this library:
 
 - numpy
-- ordered-set
 - pandas
-- PyLaTeX
-- python-dateutil
-- pytz
-- scikit-learn
-- scipy
-- six
 - sklearn
-- wget
+- rarfile
+- PyLaTeX
 
 
 After that, the main script
@@ -45,10 +40,9 @@ After that, the main script
 bash script.sh
 ```
 
-The other way is using virtual environment for Python 3, which can be
+However, it is recommended to use a virtual environment for Python 3, which can be
 done easily following an explanation
-[here](https://github.com/cperales/PyRidge#how-to-install-it-within-a-virtual-environment).
-Then, you just have to run the scripts in the main directory
+[here](https://github.com/cperales/PyRidge#how-to-install-it-within-a-virtual-environment). In this virtual enviroment, previous requirements must be installed. Then, you just have to run the scripts in the main directory
 
 ```bash
 python download_data.py
@@ -58,66 +52,39 @@ python describe_data.py
 ```
 
 The data will be downloaded, processed, k-folded and described,
-in that order. Final folder will be `data`.
+in that order. Customizable parameters, such as folders to process and number of folds, are found in `parameter_config.ini`:
+    
+    [DOWNLOAD]
+    config_folders = datafiles/regression,datafiles/classification
+    raw_folder = raw_data
+    remove_older = True
+    
+    [PROCESS]
+    config_folders = datafiles/regression,datafiles/classification
+    processed_folder = processed_data
+    remove_older = True
+    
+    [FOLD]
+    processed_folders = processed_data/regression,processed_data/classification
+    data_folder = data
+    remove_older = True
+    n_fold = 10
+    
+    [DESCRIBE]
+    data_folders = data/regression,data/classification
+    description_folder = description
+    remove_older = True
 
-## Guide to config files
+## Citation policy
 
-Due to the varying nature of the datasets in the repository, the script needs to behave differently for different datasets. This is achieved using the `config.ini` files present in each dataset folder. An example of this file is:
+> Perales-González, Carlos, (2020). UCI download-process, v1.3, GitHub repository, https://github.com/cperales/uci-download-process
 
-    [info]
-    name = mammographic-mass.data
-    info_url = https://archive.ics.uci.edu/ml/datasets/Mammographic+Mass
-    data_url = https://archive.ics.uci.edu/ml/machine-learning-databases/mammographic-masses/mammographic_masses.data
-    target_index = 6
-    id_indices =
-    value_indices = 1,2,3,4,5
-    categoric_indices = 3,4
-    separator = comma
-    header_lines = 0
-
-A guide to each of the attributes follows.
-
-##### [info]
-
-This is an arbitrary choice for describing the data in the config file. It must be included at the start of each file but otherwise doesn't matter.
-
-##### name
-
-The name of the dataset that will be produced by the script. The convention used is the name of the dataset on the UCI info page, converted to lower case with spaces replaced with hyphens. The suffix `.data` is then added. This name (before adding `.data`) is also used for the name of the containing folder.
-
-##### info_url
-
-Contains the link to the UCI information page for the dataset, allowing the dataset to be traced back to its source.
-
-##### data_url
-
-Contains the link to the dataset itself on UCI. To avoid checking in the datasets to Github, the script instead downloads any missing datafiles using these links when it runs.
-
-##### target_index
-
-A single integer indicating the index (1-based) of the variable in the dataset we want to predict.
-
-##### id_indices
-
-Any number of integers (separated by commas and no spaces i.e. 1,2,3) that indicate the indices (1-based) of any id values present in the dataset. These will be combined to form the final id value used in the output. If no id information is present in the dataset, leave this blank and the id value will be generated automatically.
-
-##### value_indices
-
-One or more integers (separated by commas and no spaces i.e. 1,2,3) that indicate the indices (1-based) of the data values in the dataset.
-
-##### categoric_indices
-
-A subset of the integers specified in `value_indices` that indicate those data values that are categorical/numeric in nature.
-
-##### separator
-
-The separator between values in the dataset.
-
-##### header_lines
-
-An integer number of header lines in the dataset before the values are reached.
-
-## Acknowledgement
-
-Config files comes from [JackDunnNZ/uci-data](https://github.com/JackDunnNZ/uci-data)
-repository. Contributing by adding new datasets to original repository is recommended.
+    @misc{UCI-download-process,
+      author = {Carlos, Perales-González},
+      title = {UCI download/process},
+      year = {2020},
+      publisher = {GitHub},
+      journal = {GitHub repository},
+      howpublished = {\url{https://github.com/cperales/uci-download-process}},
+      tag = {1.3}
+    }

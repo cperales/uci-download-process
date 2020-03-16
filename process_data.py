@@ -318,7 +318,11 @@ def process_data(config_folder,
 
 
 if __name__ == '__main__':
-    parameter_config = read_config('config.ini')
+    try:
+        parameter_config = read_config('parameter_config.ini')
+    except NameError:
+        print('Not custom parameter config file found, using default')
+        parameter_config = read_config('default_config.ini')
     config_folders = parameter_config.get('PROCESS',
                                           'config_folders').split(',')
 

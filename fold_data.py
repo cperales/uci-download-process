@@ -102,7 +102,11 @@ def k_folding(data_folder, n_fold=10):
 
 
 if __name__ == '__main__':
-    parameter_config = read_config('config.ini')
+    try:
+        parameter_config = read_config('parameter_config.ini')
+    except NameError:
+        print('Not custom parameter config file found, using default')
+        parameter_config = read_config('default_config.ini')
     processed_folders = parameter_config.get('FOLD',
                                              'processed_folders').split(',')
 
