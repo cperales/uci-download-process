@@ -7,63 +7,71 @@ from zipfile import ZipFile
 from rarfile import RarFile
 
 
+def read_config(config_file='config.ini'):
+    """
+    Read the configuration file.
+
+    :param str config_file: Path to the configuration file.
+    :return:
+    """
+    config = configparser.ConfigParser()
+    config.read(config_file)
+    return config
+
+
 def download_files(config_folder,
-                   raw_data_folder,
-                   log_file):
+                   raw_data_folder):
     dataset_folders = list()
     list_files = list()
 
-    with open(log_file, 'w') as f:
-        for folder in os.listdir(config_folder):
-            complete_folder = os.path.join(config_folder, folder)
-            if os.path.isdir(complete_folder):  # It could be a .csv
-                dataset_folders.append(folder)
-                config_file = os.path.join(complete_folder, 'config.ini')
-                list_files.append(config_file)
-                config = configparser.ConfigParser()
-                config.read(config_file)
-                try:
-                    data_name = config['info']['name']
-                    final_filename = os.path.join(complete_folder, data_name)
-                    if not os.path.isfile(final_filename):
-                        # URL file
-                        data_url = config['info']['data_url']
-                        data_download = os.path.split(config['info']['data_url'])[-1]
-                        f.write(''.join([data_url, '\n']))
-                        download_filename = os.path.join(complete_folder, data_download)
-                        # Download file
-                        bash_command = ['wget', '-nc', data_url, '-O', download_filename]
-                        subprocess.run(bash_command)
-                        # Extract data if necessary
-                        if '.tar.gz' == data_download[-7:] or '.tgz' == data_download[-4:]:
-                            tar_name = config.get('info', 'tar_name', fallback=data_name)
-                            extract_tar(complete_folder=complete_folder,
-                                        tar_file=data_download,
-                                        tar_name=tar_name,
-                                        data_name=data_name)
-                        elif '.zip' == data_download[-4:]:
-                            zip_name = config.get('info', 'zip_name', fallback=data_name)
-                            extract_zip(complete_folder=complete_folder,
-                                        zip_file=data_download,
-                                        zip_name=zip_name,
-                                        data_name=data_name)
-                        elif '.rar' == data_download[-4:]:
-                            rar_name = config.get('info', 'rar_name', fallback=data_name)
-                            extract_rar(complete_folder=complete_folder,
-                                        rar_file=data_download,
-                                        rar_name=rar_name,
-                                        data_name=data_name)
-                        elif data_name != data_download:
-                            os.rename(download_filename,
-                                      final_filename)
-                    else:
-                        # print('Dataset', data_name, 'already downloaded')
-                        pass
-                    # Copy file to raw data folder
-                    final_filename_2 = os.path.join(raw_data_folder, data_name)
-                    shutil.copyfile(final_filename, final_filename_2)
-                except Exception as e:
-                    print('Error in', folder, ':', e)
+    for folder in os.listdir(config_folder):
+        complete_folder = os.path.join(config_folder, folder)
+        if os.path.isdir(complete_folder):  # It could be a .csv
+            dataset_folders.append(folder)
+            config_file = os.path.join(complete_folder, 'config.ini')
+            list_files.append(config_file)
+            config = read_config(config_file)
+            try:
+                data_name = config['info']['name']
+                final_filename = os.path.join(complete_folder, data_name)
+                if not os.path.isfile(final_filename):
+                    # URL file
+                    data_url = config['info']['data_url']
+                    data_download = os.path.split(config['info']['data_url'])[-1]
+                    f.write(''.join([data_url, '\n']))
+                    download_filename = os.path.join(complete_folder, data_download)
+                    # Download file
+                    bash_command = ['wget', '-nc', data_url, '-O', download_filename]
+                    subprocess.run(bash_command)
+                    # Extract data if necessary
+                    if '.tar.gz' == data_download[-7:] or '.tgz' == data_download[-4:]:
+                        tar_name = config.get('info', 'tar_name', fallback=data_name)
+                        extract_tar(complete_folder=complete_folder,
+                                    tar_file=data_download,
+                                    tar_name=tar_name,
+                                    data_name=data_name)
+                    elif '.zip' == data_download[-4:]:
+                        zip_name = config.get('info', 'zip_name', fallback=data_name)
+                        extract_zip(complete_folder=complete_folder,
+                                    zip_file=data_download,
+                                    zip_name=zip_name,
+                                    data_name=data_name)
+                    elif '.rar' == data_download[-4:]:
+                        rar_name = config.get('info', 'rar_name', fallback=data_name)
+                        extract_rar(complete_folder=complete_folder,
+                                    rar_file=data_download,
+                                    rar_name=rar_name,
+                                    data_name=data_name)
+                    elif data_name != data_download:
+                        os.rename(download_filename,
+                                  final_filename)
+                else:
+                    pass
+                # Copy file to raw data folder
+                final_filename_2 = os.path.join(raw_data_folder, data_name)
+                shutil.copyfile(final_filename, final_filename_2)
+            except Exception as e:
+                print('Error in', folder, ':', e)
 
 
 def extract_tar(complete_folder, tar_file, tar_name, data_name):
@@ -154,19 +162,26 @@ def remove_folder(folder):
 
 
 if __name__ == '__main__':
-    config_folders = ['datafiles/regression/']
-    log_file = 'logs/db.txt'
-    raw_data_folder = 'raw_data'
+    parameter_config = read_config('config.ini')
+    config_folders = parameter_config.get('DOWNLOAD',
+                                          'config_folders').split(',')
+
+    raw_data_folder = parameter_config.get('DOWNLOAD',
+                                           'raw_folder',
+                                           fallback='raw_data')
     check_folder(raw_data_folder)
+    remove_older_raw = eval(parameter_config.get('DOWNLOAD',
+                                                 'remove_older',
+                                                 fallback='True'))
 
     for config_folder in config_folders:
+        # A data folder per type of dataset (classification or regression)
         data_type = config_folder.split('/')[1]
-        raw_folder = os.path.join(raw_data_folder, data_type)
-        # Remove and create folder
-        remove_folder(raw_folder)
-        check_folder(raw_folder)
+        raw_subfolder = os.path.join(raw_data_folder, data_type)
+        # Remove and create subfolder
+        if remove_older_raw is True:
+            remove_folder(raw_subfolder)
+        check_folder(raw_subfolder)
 
-        # remove_files(config_folder)
         download_files(config_folder=config_folder,
-                       raw_data_folder=raw_folder,
-                       log_file=log_file)
+                       raw_data_folder=raw_subfolder)

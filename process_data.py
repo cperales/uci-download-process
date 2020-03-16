@@ -5,7 +5,7 @@ import configparser
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import LabelEncoder, LabelBinarizer
-from download_data import check_folder, remove_folder
+from download_data import check_folder, remove_folder, read_config
 
 separators = {'comma': ',',
               ',': ',',
@@ -27,13 +27,9 @@ min_target = 5
 
 
 def process_data(config_folder,
-                 processed_folder,
-                 log_process,
-                 log_download):
+                 processed_folder):
     """
 
-    :param str log_process:
-    :param str log_download:
     :param str config_folder:
     :param str processed_folder:
     :return:
@@ -317,68 +313,32 @@ def process_data(config_folder,
                 else:
                     print('{} does not have .data file'.format(full_dir))
                 download_error.append(full_dir)
-        else: # This is not a directory
+        else:  # This is not a directory
             pass
-
-    log_download_error(log_download=log_download,
-                       download_error=download_error)
-
-    log_process_error(log_process=log_process,
-                      error_files=error_files)
-
-
-def log_process_error(log_process, error_files):
-    """
-    Writhe the errors from processing
-    into a log file.
-
-    :param str log_process: Path where the log
-        for data process errors is saved.
-    :param error_files: List of files with error
-    :return:
-    """
-    with open(log_process, 'w') as f:
-        if len(error_files) > 0:
-            for file in error_files:
-               f.write(''.join([file, '\n']))
-        else:
-            f.write('\n')
-
-
-def log_download_error(log_download, download_error):
-    """
-    Write the errors from downloading into
-    a log file.
-
-    :param str log_download: Path where the log
-        for data download errors is saved.
-    :param download_error: List of files with error
-    :return:
-    """
-    with open(log_download, 'w') as f:
-        if len(download_error) > 0:
-            for folder in download_error:
-                if os.path.isdir(folder):
-                    f.write(''.join([folder, '\n']))
-        else:
-            f.write('\n')
 
 
 if __name__ == '__main__':
-    log_process = 'logs/convert_error.txt'
-    log_download = 'logs/download_error.txt'
-    config_folders = ['datafiles/regression']
-    processed_data_folder = 'processed_data/'
+    parameter_config = read_config('config.ini')
+    config_folders = parameter_config.get('PROCESS',
+                                          'config_folders').split(',')
+
+    processed_data_folder = parameter_config.get('PROCESS',
+                                                 'processed_folder',
+                                                 fallback='processed_data')
     check_folder(processed_data_folder)
+
+    remove_older = eval(parameter_config.get('PROCESS',
+                                             'remove_older',
+                                             fallback='True'))
 
     for config_folder in config_folders:
         data_type = config_folder.split('/')[1]
         processed_folder = os.path.join(processed_data_folder, data_type)
         # Remove and create folder
-        remove_folder(processed_folder)
+        if remove_older is True:
+            remove_folder(processed_folder)
         check_folder(processed_folder)
 
         process_data(config_folder=config_folder,
-                     processed_folder=processed_folder,
-                     log_process=log_process,
-                     log_download=log_download)
+                     processed_folder=processed_folder)
+        print()

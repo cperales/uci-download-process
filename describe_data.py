@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 from pylatex import Document, LongTable
 from copy import deepcopy
-from download_data import check_folder, remove_folder
+from download_data import check_folder, remove_folder, read_config
 
 
 def description_classification(full_data_files, description_folder):
@@ -168,24 +168,30 @@ def description_regression(full_data_files, description_folder):
 
 
 if __name__ == '__main__':
-    description_folder = 'description'
+    parameter_config = read_config('config.ini')
+    data_folders = parameter_config.get('DESCRIBE',
+                                        'data_folders').split(',')
+
+    description_folder = parameter_config.get('DESCRIBE',
+                                              'description',
+                                              fallback='description')
     check_folder(description_folder)
 
-    data_folders = ['data/classification', 'data/regression']
+    remove_older = eval(parameter_config.get('DESCRIBE',
+                                             'remove_older',
+                                             fallback='True'))
+
     for data_folder in data_folders:
+        data_type = os.path.split(data_folder)[1]
         full_data_files = glob.glob(data_folder + '/*/*.data')
-        if len(full_data_files) >= 1:
-            if 'classification' in data_folder:
-                description_folder_type = os.path.join(description_folder,
-                                                       'classification')
-                # Remove and create folder
-                remove_folder(description_folder_type)
-                check_folder(description_folder_type)
-                description_classification(full_data_files, description_folder_type)
-            else:
-                description_folder_type = os.path.join(description_folder,
-                                                       'regression')
-                # Remove and create folder
-                remove_folder(description_folder_type)
-                check_folder(description_folder_type)
-                description_regression(full_data_files, description_folder_type)
+        description_folder_type = os.path.join(description_folder,
+                                               data_type)
+        # Remove and create folder
+        if remove_older is True:
+            remove_folder(description_folder_type)
+        check_folder(description_folder_type)
+
+        if data_type == 'classification':
+            description_classification(full_data_files, description_folder_type)
+        else:
+            description_regression(full_data_files, description_folder_type)
