@@ -40,7 +40,6 @@ def download_files(config_folder,
                     # URL file
                     data_url = config['info']['data_url']
                     data_download = os.path.split(config['info']['data_url'])[-1]
-                    f.write(''.join([data_url, '\n']))
                     download_filename = os.path.join(complete_folder, data_download)
                     # Download file
                     bash_command = ['wget', '-nc', data_url, '-O', download_filename]
