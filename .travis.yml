@@ -6,9 +6,12 @@ git:
 install:
   - pip install coveralls PyYAML pytest-cov
   - pip install -r requirements.txt
-  - apt-get install -y texlive-latex-recommended
+  - sudo apt-get install -y texlive-latex-recommended
 script:
-  - bash script.sh
+  - python download_data.py
+  - python process_data.py
+  - python fold_data.py
+  - python describe_data.py
 branches:
   only:
     - master
