@@ -1,4 +1,8 @@
 # UCI download/process software repository
+
+
+[![Build Status](https://app.travis-ci.com/cperales/uci-download-process.svg?branch=master)](https://app.travis-ci.com/github/cperales/uci-download-process)
+
 #### Open source Python repository for downloading, processing, folding and describing supervised machine learning datasets from UCI and others raw repositories
 
 
