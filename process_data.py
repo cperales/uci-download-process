@@ -186,7 +186,7 @@ def process_data(config_folder,
                     if df[label_column].dtype != int and df[label_column].dtype != float:
                         if 'regression' in config_folder:
                             df[label_column] = pd.Series(df[label_column],
-                                                         dtype=np.float)
+                                                         dtype=np.float32)
                         else:
                             le = LabelEncoder()
                             try:
@@ -196,7 +196,7 @@ def process_data(config_folder,
                                 df[label_column] = df[label_column].factorize()[0]
                             df[label_column] = pd.Series(df[label_column] +
                                                          (1 - np.min(df[label_column].values)),
-                                                     dtype=np.int)
+                                                     dtype=np.int32)
                     # Store label column
                     label_series = df[label_column].copy()
                     df = df.drop(columns=label_column)
@@ -260,7 +260,7 @@ def process_data(config_folder,
                         if c not in categoric_indices:
                             # series = [float(series_values[i])
                             #           for i in range(len(df[c]))]
-                            df[c] = pd.Series(df[c], dtype=np.float)
+                            df[c] = pd.Series(df[c], dtype=np.float32)
                         else:  # It was a string, need to be transformed
                             number_cat = len(np.unique(series_values))
                             df = df.drop(columns=c)
