@@ -110,10 +110,10 @@ if __name__ == '__main__':
     processed_folders = parameter_config.get('FOLD',
                                              'processed_folders').split(',')
 
-    data_folder = parameter_config.get('FOLD',
+    fold_data_folder = parameter_config.get('FOLD',
                                        'data_folder',
                                        fallback='data')
-    check_folder(data_folder)
+    check_folder(fold_data_folder)
 
     remove_older = eval(parameter_config.get('FOLD',
                                              'remove_older',
@@ -124,7 +124,7 @@ if __name__ == '__main__':
                                       fallback='10'))
     for processed_folder in processed_folders:
         data_type = os.path.split(processed_folder)[1]
-        data_folder = os.path.join(data_folder, data_type)
+        data_folder = os.path.join(fold_data_folder, data_type)
         # Remove and create folder
         if remove_older is True:
             remove_folder(data_folder)
