@@ -2,6 +2,7 @@
 
 
 [![Build Status](https://app.travis-ci.com/cperales/uci-download-process.svg?branch=master)](https://app.travis-ci.com/github/cperales/uci-download-process)
+[![Coverage Status](https://coveralls.io/repos/github/cperales/uci-download-process/badge.svg?branch=master)](https://coveralls.io/github/cperales/uci-download-process?branch=master)
 
 #### Open source Python repository for downloading, processing, folding and describing supervised machine learning datasets from UCI and others raw repositories
 
