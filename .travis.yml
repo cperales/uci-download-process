@@ -4,18 +4,18 @@ python:
 git:
   depth: false
 install:
-  - pip install coveralls PyYAML pytest-cov
+  - pip install coveralls PyYAML coveralls
   - pip install -r requirements.txt
   - sudo apt-get install -y texlive-latex-recommended
 script:
-  - python download_data.py
-  - python process_data.py
-  - python fold_data.py
-  - python describe_data.py
+  - coverage run download_data.py
+  - coverage run process_data.py
+  - coverage run fold_data.py
+  - coverage run describe_data.py
 branches:
   only:
     - master
 notifications:
   email: false
 after_sucess:
-  - echo "Travis CI built!"
+  - coveralls
