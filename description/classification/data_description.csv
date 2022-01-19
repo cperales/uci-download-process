@@ -1,12 +1,9 @@
 Dataset,Size,Attributes,Classes,Class distribution
 skin-segmentation,245057,3,2,194198;50859
-statlog-shuttle,43500,9,7,34108;6748;2458;132;37;11;6
-weight-exercises,39242,53,5,11159;7593;7214;6844;6432
 adult,32561,107,2,24720;7841
 chess-king-rook-vs-king,28056,40,18,4553;4194;3597;2854;2796;2166;1985;1712;1433;683;592;471;390;246;198;81;78;27
 poker-hand,25010,10,10,12493;10599;1206;513;93;54;36;6;5;5
 letter-recognition,20000,16,26,813;805;803;796;792;789;787;786;783;783;775;773;768;766;764;761;758;755;753;752;748;747;739;736;734;734
-polish-bankruptcy,19967,64,2,19535;432
 magic-gamma-telescope,19020,10,2,12332;6688
 electrical-grid,10000,12,2,6380;3620
 mushroom,8124,111,2,4208;3916
@@ -20,7 +17,7 @@ optical-recognition-handwritten-digits,3823,64,10,389;389;387;387;382;380;380;37
 thyroid-disease-ann-thyroid,3772,21,3,3488;191;93
 chess-king-rook-vs-king-pawn,3196,38,2,1669;1527
 thyroid-disease-sick-euthyroid,3163,20,2,2870;293
-thyroid-disease-allrep_2,2800,28,4,2713;35;29;23
+thyroid-disease-allrep,2800,27,4,2713;35;29;23
 thyroid-disease-allhyper,2800,27,4,2723;62;8;7
 seismic-bumps,2584,22,2,2414;170
 thyroid-disease-dis,2028,28,2,1989;39
@@ -42,13 +39,15 @@ blood-transfusion-service-center,748,4,2,570;178
 breast-cancer-wisconsin,683,9,2,444;239
 credit-approval,666,46,2,367;299
 balance-scale,625,4,3,288;288;49
-hill-valley-noise,606,100,2,307;299
 hill-valley,606,100,2,305;301
+hill-valley-noise,606,100,2,307;299
 indian-liver-patient,579,10,2,414;165
 breast-cancer-wisconsin-diagnostic,569,30,2,357;212
 climate-model-simulation-crashes,540,18,2,494;46
 thoracic-surgery,470,27,2,400;70
 congressional-voting-records,435,48,2,267;168
+monks-problems-1,432,6,2,216;216
+monks-problems-3,432,6,2,228;204
 monks-problems-2,432,6,2,290;142
 libras-movement,360,90,15,24;24;24;24;24;24;24;24;24;24;24;24;24;24;24
 dermatology,358,34,6,111;71;60;48;48;20
@@ -70,16 +69,13 @@ wine,178,13,3,71;59;48
 teaching-assistant-evaluation,151,54,3,52;50;49
 iris,150,4,3,50;50;50
 hayes-roth,132,4,3,51;51;30
-monks-problems-1,124,6,2,62;62
-monks-problems-3,122,6,2,62;60
-echocardiogram,106,10,3,45;44;17
 fertility,100,9,2,88;12
-spect-heart,80,22,2,40;40
 spectf-heart,80,44,2,40;40
+spect-heart,80,22,2,40;40
 hepatitis,80,19,2,67;13
 soybean-small,47,45,4,17;10;10;10
 lung-cancer,32,146,3,13;10;9
-balloons-a,20,4,2,12;8
 balloons-c,20,4,2,12;8
+balloons-a,20,4,2,12;8
 balloons-b,20,4,2,12;8
 balloons-d,16,4,2,9;7
