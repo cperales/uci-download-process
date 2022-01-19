@@ -1,0 +1,17 @@
+language: python
+python:
+  - 3.9
+git:
+  depth: false
+install:
+  - pip install coveralls PyYAML pytest-cov
+  - pip install -r requirements.txt
+script:
+  - bash script.sh
+branches:
+  only:
+    - master
+notifications:
+  email: false
+after_sucess:
+  - echo "Travis CI built!"
