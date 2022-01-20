@@ -4,8 +4,8 @@ git:
 jobs:
   include:
     - os: linux
-    - python: 3.9
-    - dist: focal
+      python: 3.9
+      dist: focal
 install:
   - pip install -U pip
   - pip install coveralls PyYAML coveralls
