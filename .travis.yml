@@ -4,9 +4,10 @@ python:
 git:
   depth: false
 install:
+  - pip install -U pip
   - pip install coveralls PyYAML coveralls
   - pip install -r requirements.txt
-  - sudo apt update -y && sudo apt install -y texlive-latex-extra
+  - sudo apt update -y && sudo apt install -y texlive-latex-extra lmodern
 script:
   - coverage run download_data.py
   - coverage run process_data.py
